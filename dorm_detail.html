@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NestQC · Dorm Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dorm_detail.css">
+  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    
+    /* ── Edit Profile: Register-style pw strength widget ── */
+    .edit-pw-strength-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(42,138,138,0.2);
+      border-radius: 10px;
+      padding: 12px 14px 10px;
+      margin-bottom: 10px;
+      display: none;  /* shown via JS */
+    }
+    .edit-pw-strength-box.show { display: block; }
+    .edit-pw-bars { display: flex; gap: 5px; margin-bottom: 10px; }
+    .edit-pw-bar  { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+    .edit-pw-bar.met { background: #2ab4a0; }
+    .edit-pw-legend {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4px 16px; font-size: 0.74rem;
+    }
+    .edit-pw-leg {
+      display: flex; align-items: center; gap: 7px;
+      color: rgba(138,154,176,0.6); transition: color 0.2s;
+    }
+    .edit-pw-leg.met { color: #2ab4a0; }
+    .edit-pw-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(138,154,176,0.3); transition: background 0.25s;
+    }
+    .edit-pw-dot.met { background: #2ab4a0; box-shadow: 0 0 6px rgba(42,180,160,0.6); }
+
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="overlay" id="overlay" onclick="closePanel()"></div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <div class="panel-title">Menu</div>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-user">
+      <div class="user-avatar" id="menuAvatar">J</div>
+      <div><div class="user-name" id="menuName">Loading…</div></div>
+    </div>
+    <div class="panel-items">
+      <a href="#" class="panel-item" onclick="openEditModal(event)">✏️ &nbsp;Edit Profile</a>
+      <a href="#" class="panel-item" onclick="openLikedPanel(event)">
+        ❤️ &nbsp;Liked Dorms
+        <span class="liked-badge" id="likedBadge">0</span>
+      </a>
+    </div>
+    <div class="panel-logout" onclick="logout()">🚪 &nbsp;Logout</div>
+  </div>
+
+  <!-- LIKED PANEL -->
+  <div class="liked-panel" id="likedPanel">
+    <div class="panel-header">
+      <button class="back-panel-btn" onclick="closeLikedPanel()">← Back</button>
+      <div class="panel-title">Liked Dorms</div>
+      <div style="width:60px"></div>
+    </div>
+    <div class="dorm-liked-list" id="dormList"></div>
+  </div>
+
+  <!-- EDIT PROFILE MODAL -->
+  <div class="edit-modal-overlay" id="editModalOverlay" onclick="handleEditOverlayClick(event)">
+    <div class="edit-modal" id="editModal">
+      <div class="edit-modal-header">
+        <div class="edit-modal-title">Edit Profile</div>
+        <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="edit-modal-body">
+        <div class="edit-avatar-row">
+          <div class="edit-avatar-preview" id="editAvatarPreview">J<input type="file" accept="image/*" onchange="previewAvatar(event)" /></div>
+          <div class="edit-avatar-info"><strong>Profile Photo</strong><span>Click avatar to upload a new photo</span></div>
+        </div>
+        <div class="edit-tabs">
+          <button class="edit-tab active" onclick="switchEditTab('info', this)">Personal Info</button>
+          <button class="edit-tab" onclick="switchEditTab('password', this)">Change Password</button>
+        </div>
+        <div class="edit-tab-content active" id="tab-info">
+          <div class="edit-alert" id="infoAlert"><span></span><span id="infoAlertText"></span></div>
+          <div class="edit-form-row">
+            <div class="edit-form-group"><label class="edit-form-label">First Name</label><input class="edit-form-input" type="text" id="editFname" placeholder="Juan" /></div>
+            <div class="edit-form-group"><label class="edit-form-label">Last Name</label><input class="edit-form-input" type="text" id="editLname" placeholder="Dela Cruz" /></div>
+          </div>
+          <div class="edit-form-group"><label class="edit-form-label">Middle Name <span class="optional">(optional)</span></label><input class="edit-form-input" type="text" id="editMname" placeholder="Santos" /></div>
+          <div class="edit-form-group"><label class="edit-form-label">Username</label><input class="edit-form-input" type="text" id="editUname" placeholder="juandelacruz" /></div>
+          <button class="edit-save-btn" id="saveInfoBtn" onclick="saveProfileInfo()">Save Changes</button>
+        </div>
+        <div class="edit-tab-content" id="tab-password">
+          <div class="edit-alert" id="pwAlert"><span></span><span id="pwAlertText"></span></div>
+          <div class="edit-form-group"><label class="edit-form-label">Current Password</label><div class="pw-wrap"><input class="edit-form-input" type="password" id="currentPw" placeholder="Enter current password" style="padding-right:55px" /><button class="pw-toggle" type="button" onclick="togglePw('currentPw',this)">Show</button></div></div>
+                      <div class="edit-form-group">
+            <label class="edit-form-label">New Password</label>
+            <!-- Register-style strength widget -->
+            <div class="edit-pw-strength-box" id="editPwStrength">
+              <div class="edit-pw-bars">
+                <div class="edit-pw-bar" id="pwBar1"></div>
+                <div class="edit-pw-bar" id="pwBar2"></div>
+                <div class="edit-pw-bar" id="pwBar3"></div>
+                <div class="edit-pw-bar" id="pwBar4"></div>
+                <div class="edit-pw-bar" id="pwBar5"></div>
+              </div>
+              <div class="edit-pw-legend">
+                <div class="edit-pw-leg" id="req-length"><span class="edit-pw-dot" id="dot-length"></span>Min. 8 characters</div>
+                <div class="edit-pw-leg" id="req-upper"><span class="edit-pw-dot" id="dot-upper"></span>Uppercase letter</div>
+                <div class="edit-pw-leg" id="req-lower"><span class="edit-pw-dot" id="dot-lower"></span>Lowercase letter</div>
+                <div class="edit-pw-leg" id="req-number"><span class="edit-pw-dot" id="dot-number"></span>Number (0–9)</div>
+                <div class="edit-pw-leg" id="req-special"><span class="edit-pw-dot" id="dot-special"></span>Special character (@, #, !…)</div>
+              </div>
+            </div>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="newPw" placeholder="Enter new password" style="padding-right:55px" oninput="checkPwStrength()" onfocus="showEditPwHint()" onblur="hideEditPwHint()" />
+              <button class="pw-toggle" type="button" onclick="togglePw('newPw',this)">Show</button>
+            </div>
+          </div>
+          <div class="edit-form-group"><label class="edit-form-label">Confirm New Password</label><div class="pw-wrap"><input class="edit-form-input" type="password" id="confirmPw" placeholder="Re-enter new password" style="padding-right:55px" /><button class="pw-toggle" type="button" onclick="togglePw('confirmPw',this)">Show</button></div></div>
+          <button class="edit-save-btn" id="savePwBtn" onclick="savePassword()">Change Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <a href="browse_dorms.html" class="back-btn"><span class="arrow">←</span> Back</a>
+      <div class="header-divider"></div>
+      <a href="homepage.html" class="logo">
+        <div class="logo-icon"><img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="logo-img" /></div>
+        <div class="logo-text">Nest<span>QC</span></div>
+      </a>
+      <div class="header-divider"></div>
+      <span class="dorm-name-header" id="headerDormName">Loading…</span>
+    </div>
+    <div class="header-right">
+    <div id="guest-header-btns" style="display:none; gap:8px; align-items:center;">
+      <a href="login.html"><button class="nav-btn">Sign In</button></a>
+      <a href="register.html"><button class="nav-btn primary">Sign Up</button></a>
+    </div>
+      <button class="theme-toggle" title="Toggle light/dark mode">
+        <span class="icon-dark">🌙</span>
+        <span class="icon-light">☀️</span>
+      </button>
+      <button class="menu-btn" onclick="openPanel()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- IMAGE CAROUSEL -->
+  <div class="carousel" id="carousel">
+    <div class="carousel-inner" id="carouselInner">
+      <div class="carousel-slide">🏠</div>
+      <div class="carousel-slide">🏠</div>
+      <div class="carousel-slide">🏠</div>
+    </div>
+    <button class="carousel-btn prev" onclick="slideCarousel(-1)">←</button>
+    <button class="carousel-btn next" onclick="slideCarousel(1)">→</button>
+    <div class="carousel-dots" id="carouselDots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="content-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
+        <h1 class="dorm-title" id="dormTitle">Loading…</h1>
+        <div class="dorm-location-row">📍 <span id="dormAddress">—</span></div>
+        <div class="dorm-rating-row">
+          <div class="stars" id="dormStars"></div>
+          <span class="rating-text" id="dormRatingText"></span>
+        </div>
+
+        <div class="dorm-price-main" id="dormPrice">—</div>
+        <div class="dorm-price-label">per month (starting price)</div>
+
+        <div class="section-heading">Amenities</div>
+        <div class="amenities-grid" id="amenitiesGrid">
+          <div style="color:var(--text-soft);font-size:0.82rem">Loading…</div>
+        </div>
+
+        <div class="action-btns">
+          <a href="#" class="btn-map" id="viewMapBtn">🗺 View on Map</a>
+          <button class="btn-save" id="saveBtn" onclick="toggleSave()">♡ Like Dorm</button>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+        <div class="section-heading">About This Dorm</div>
+        <p class="about-text" id="aboutText">Loading dorm information…</p>
+
+        <!-- CONTACT LANDLORD — replaces room types -->
+        <div class="section-heading">Contact Information</div>
+        <div class="contacts-card" id="contactsCard">
+
+          <a class="contact-item contact-link" id="contactWebsite" href="#" target="_blank" rel="noopener">
+            <div class="contact-icon">🌐</div>
+            <div class="contact-info">
+              <div class="contact-label">Website</div>
+              <div class="contact-value" id="contactWebsiteVal">—</div>
+            </div>
+            <div class="contact-arrow">→</div>
+          </a>
+          <a class="contact-item contact-link" id="contactPhone" href="#">
+            <div class="contact-icon">📞</div>
+            <div class="contact-info">
+              <div class="contact-label">Phone</div>
+              <div class="contact-value" id="contactPhoneVal">—</div>
+            </div>
+            <div class="contact-arrow">→</div>
+          </a>
+          <a class="contact-item contact-link" id="contactEmail" href="#">
+            <div class="contact-icon">✉️</div>
+            <div class="contact-info">
+              <div class="contact-label">Email</div>
+              <div class="contact-value" id="contactEmailVal">—</div>
+            </div>
+            <div class="contact-arrow">→</div>
+          </a>
+          <a class="contact-item contact-link" id="contactFacebook" href="#" target="_blank" rel="noopener">
+            <div class="contact-icon">📘</div>
+            <div class="contact-info">
+              <div class="contact-label">Facebook</div>
+              <div class="contact-value" id="contactFacebookVal">Visit Facebook Page</div>
+            </div>
+            <div class="contact-arrow">→</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS SECTION -->
+    <div class="reviews-section">
+      <div class="reviews-header">
+        <div class="reviews-title">Reviews</div>
+        <button class="btn-write-review" id="writeReviewBtn" onclick="openReviewModalWithCheck()">✏️ Write a Review</button>
+      </div>
+      <div class="reviews-grid" id="reviewsGrid">
+        <div class="no-reviews">Loading reviews…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW MODAL -->
+  <div class="modal-overlay" id="reviewModalOverlay" onclick="handleReviewOverlayClick(event)">
+    <div class="modal-box" id="reviewModal">
+      <div class="modal-header">
+        <div class="modal-title" id="reviewModalTitle">Write a Review</div>
+        <button class="modal-close" onclick="closeReviewModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Share your experience at this dorm. Please select a star rating and share your experience.</p>
+        <div class="review-star-row">
+          <span class="review-star-label">Rating <span style="color:#e07070">*</span></span>
+          <div class="star-picker" id="starPicker">
+            <span class="pick-star" data-val="1" onclick="pickStar(1)">★</span>
+            <span class="pick-star" data-val="2" onclick="pickStar(2)">★</span>
+            <span class="pick-star" data-val="3" onclick="pickStar(3)">★</span>
+            <span class="pick-star" data-val="4" onclick="pickStar(4)">★</span>
+            <span class="pick-star" data-val="5" onclick="pickStar(5)">★</span>
+          </div>
+          <span class="star-clear" onclick="pickStar(0)">Clear</span>
+        </div>
+        <div class="review-form-group">
+          <label class="review-form-label">Your Review</label>
+          <textarea class="review-textarea" id="reviewComment" placeholder="Tell others about this dorm — location, cleanliness, management, value for money…" rows="4"></textarea>
+        </div>
+        <div class="modal-alert" id="reviewAlert"></div>
+        <button class="modal-save-btn" id="saveReviewBtn" onclick="saveReview()">Post Review</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span id="toast-msg"></span>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="dorm_detail.js"></script>
+  <script src="editprofile.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>

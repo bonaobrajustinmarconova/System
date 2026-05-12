@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NestQC — Find Your Home Away From Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="homepage.css">
+<link rel="stylesheet" href="chat.css">
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <!-- Side Panel Overlay -->
+  <div class="overlay" id="overlay" onclick="closePanel()"></div>
+
+  <!-- ── Main Side Panel ── -->
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <div class="panel-title">Menu</div>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-user">
+      <div class="user-avatar" id="menuAvatar">J</div>
+      <div>
+        <div class="user-name" id="menuName">Jones Nhick Bautista</div>
+      </div>
+    </div>
+    <div class="panel-items">
+      <a href="#" class="panel-item" onclick="openEditModal(event)">✏️ &nbsp;Edit Profile</a>
+      <a href="#" class="panel-item" onclick="openLikedPanel(event)">
+        ❤️ &nbsp;Liked Dorms
+        <span class="liked-badge" id="likedBadge">…</span>
+      </a>
+    </div>
+    <div class="panel-logout" onclick="logout()">🚪 &nbsp;Logout</div>
+  </div>
+
+  <!-- ── Liked Dorms Sub-Panel ── -->
+  <div class="liked-panel" id="likedPanel">
+    <div class="panel-header">
+      <button class="back-btn" onclick="closeLikedPanel()">← Back</button>
+      <div class="panel-title">Liked Dorms</div>
+      <div style="width:60px"></div>
+    </div>
+    <div class="dorm-list" id="dormList"></div>
+  </div>
+
+  <!-- ── Edit Profile Modal ── -->
+  <div class="edit-modal-overlay" id="editModalOverlay" onclick="handleEditOverlayClick(event)">
+    <div class="edit-modal" id="editModal">
+      <div class="edit-modal-header">
+        <div class="edit-modal-title">Edit Profile</div>
+        <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="edit-modal-body">
+
+        <!-- Avatar -->
+        <div class="edit-avatar-row">
+          <div class="edit-avatar-preview" id="editAvatarPreview">
+            J
+            <input type="file" accept="image/*" onchange="previewAvatar(event)" />
+          </div>
+          <div class="edit-avatar-info">
+            <strong>Profile Photo</strong>
+            <span>Click avatar to upload a new photo</span>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="edit-tabs">
+          <button class="edit-tab active" onclick="switchEditTab('info', this)">Personal Info</button>
+          <button class="edit-tab" onclick="switchEditTab('password', this)">Change Password</button>
+        </div>
+
+        <!-- Personal Info Tab -->
+        <div class="edit-tab-content active" id="tab-info">
+          <div class="edit-alert" id="infoAlert"><span></span><span id="infoAlertText"></span></div>
+          <div class="edit-form-row">
+            <div class="edit-form-group">
+              <label class="edit-form-label">First Name</label>
+              <input class="edit-form-input" type="text" id="editFname" placeholder="Juan" />
+            </div>
+            <div class="edit-form-group">
+              <label class="edit-form-label">Last Name</label>
+              <input class="edit-form-input" type="text" id="editLname" placeholder="Dela Cruz" />
+            </div>
+          </div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Middle Name <span class="optional">(optional)</span></label>
+            <input class="edit-form-input" type="text" id="editMname" placeholder="Santos" />
+          </div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Username</label>
+            <input class="edit-form-input" type="text" id="editUname" placeholder="juandelacruz" />
+          </div>
+          <button class="edit-save-btn" id="saveInfoBtn" onclick="saveProfileInfo()">Save Changes</button>
+        </div>
+
+        <!-- Password Tab -->
+        <div class="edit-tab-content" id="tab-password">
+          <div class="edit-alert" id="pwAlert"><span></span><span id="pwAlertText"></span></div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Current Password</label>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="currentPw" placeholder="Enter current password" style="padding-right:55px" />
+              <button class="pw-toggle" type="button" onclick="togglePw('currentPw',this)">Show</button>
+            </div>
+          </div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">New Password</label>
+            <!-- Register-style strength widget -->
+            <div class="edit-pw-strength-box" id="editPwStrength">
+              <div class="edit-pw-bars">
+                <div class="edit-pw-bar" id="pwBar1"></div>
+                <div class="edit-pw-bar" id="pwBar2"></div>
+                <div class="edit-pw-bar" id="pwBar3"></div>
+                <div class="edit-pw-bar" id="pwBar4"></div>
+                <div class="edit-pw-bar" id="pwBar5"></div>
+              </div>
+              <div class="edit-pw-legend">
+                <div class="edit-pw-leg" id="req-length"><span class="edit-pw-dot" id="dot-length"></span>Min. 8 characters</div>
+                <div class="edit-pw-leg" id="req-upper"><span class="edit-pw-dot" id="dot-upper"></span>Uppercase letter</div>
+                <div class="edit-pw-leg" id="req-lower"><span class="edit-pw-dot" id="dot-lower"></span>Lowercase letter</div>
+                <div class="edit-pw-leg" id="req-number"><span class="edit-pw-dot" id="dot-number"></span>Number (0–9)</div>
+                <div class="edit-pw-leg" id="req-special"><span class="edit-pw-dot" id="dot-special"></span>Special character (@, #, !…)</div>
+              </div>
+            </div>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="newPw" placeholder="Enter new password" style="padding-right:55px" oninput="checkPwStrength()" onfocus="showEditPwHint()" onblur="hideEditPwHint()" />
+              <button class="pw-toggle" type="button" onclick="togglePw('newPw',this)">Show</button>
+            </div>
+          </div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Confirm New Password</label>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="confirmPw" placeholder="Re-enter new password" style="padding-right:55px" />
+              <button class="pw-toggle" type="button" onclick="togglePw('confirmPw',this)">Show</button>
+            </div>
+          </div>
+          <button class="edit-save-btn" id="savePwBtn" onclick="savePassword()">Change Password</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <a href="homepage.html" class="logo">
+      <div class="logo-icon"><img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="logo-img" /></div>
+      <div class="logo-text">Nest<span>QC</span></div>
+    </a>
+    <nav>
+      <button class="nav-btn" onclick="window.location.href='login.html'">Sign In</button>
+      <button class="nav-btn primary" onclick="window.location.href='register.html'">Sign Up</button>
+      <button class="theme-toggle" title="Toggle light/dark mode">
+        <span class="icon-dark">🌙</span>
+        <span class="icon-light">☀️</span>
+      </button>
+      <button class="menu-btn" id="menuBtn" onclick="openPanel()">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-tag">Welcome to NestQC — Discover verified student housing near your campus.</div>
+      <h1>Find Your <em>Perfect Home</em><br>Away From Home</h1>
+      <p>Browse verified dormitories within Quezon City. Filtered by budget, and ratings.</p>
+      <div class="hero-actions">
+       <a href="browse_dorms.html" class="cta-btn">Browse Dorms <span class="arrow">→</span></a>
+       <a href="dormfinder.html" class="cta-ghost">📍 View on Map</a>
+      </div>
+    </section>
+
+    <!-- Recommended Dorms -->
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Recommended Dorms</div>
+        </div>
+        <div class="home-sort-chips">
+          <button class="home-sort-chip active" onclick="homeSort('maut', this)">⭐ Recommended</button>
+          <button class="home-sort-chip" onclick="homeSort('rating', this)">Top Rated</button>
+          <button class="home-sort-chip" onclick="homeSort('price_asc', this)">Price ↑</button>
+          <button class="home-sort-chip" onclick="homeSort('price_desc', this)">Price ↓</button>
+          <button class="home-sort-chip" onclick="homeSort('name', this)">A–Z</button>
+        </div>
+      </div>
+      <div class="dorm-grid" id="dorm-grid">
+        <!-- Populated by homepage.js -->
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+  </main>
+
+  <footer>
+    <div class="footer-logo">Nest<span>QC</span></div>
+    <div class="footer-copy">© 2025 NestQC. Find your ideal.</div>
+  </footer>
+
+  <script src="theme.js"></script>
+  <script src="homepage.js"></script>
+  <script src="editprofile.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>

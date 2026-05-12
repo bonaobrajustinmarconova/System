@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NestQC · Dorm Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="dormfinder.css">
+  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    
+    /* ── Edit Profile: Register-style pw strength widget ── */
+    .edit-pw-strength-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(42,138,138,0.2);
+      border-radius: 10px;
+      padding: 12px 14px 10px;
+      margin-bottom: 10px;
+      display: none;  /* shown via JS */
+    }
+    .edit-pw-strength-box.show { display: block; }
+    .edit-pw-bars { display: flex; gap: 5px; margin-bottom: 10px; }
+    .edit-pw-bar  { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+    .edit-pw-bar.met { background: #2ab4a0; }
+    .edit-pw-legend {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4px 16px; font-size: 0.74rem;
+    }
+    .edit-pw-leg {
+      display: flex; align-items: center; gap: 7px;
+      color: rgba(138,154,176,0.6); transition: color 0.2s;
+    }
+    .edit-pw-leg.met { color: #2ab4a0; }
+    .edit-pw-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(138,154,176,0.3); transition: background 0.25s;
+    }
+    .edit-pw-dot.met { background: #2ab4a0; box-shadow: 0 0 6px rgba(42,180,160,0.6); }
+
+  </style>
+</head>
+
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <!-- ══════════ SIDE PANEL OVERLAY ══════════ -->
+  <div class="overlay" id="overlay" onclick="closePanel()"></div>
+
+  <!-- ── Main Side Panel ── -->
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <div class="panel-title">Menu</div>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-user">
+      <div class="user-avatar" id="menuAvatar">J</div>
+      <div>
+        <div class="user-name" id="menuName">Jones Nhick Bautista</div>
+      </div>
+    </div>
+    <div class="panel-items">
+      <a href="#" class="panel-item" onclick="openEditModal(event)">✏️ &nbsp;Edit Profile</a>
+      <a href="#" class="panel-item" onclick="openLikedPanel(event)">
+        ❤️ &nbsp;Liked Dorms
+        <span class="liked-badge" id="likedBadge">0</span>
+      </a>
+    </div>
+    <div class="panel-logout" onclick="logout()">🚪 &nbsp;Logout</div>
+  </div>
+
+  <!-- ── Liked Dorms Sub-Panel ── -->
+  <div class="liked-panel" id="likedPanel">
+    <div class="panel-header">
+      <button class="back-btn" onclick="closeLikedPanel()">← Back</button>
+      <div class="panel-title">Liked Dorms</div>
+      <div style="width:60px"></div>
+    </div>
+    <div class="dorm-liked-list" id="dormList">
+      <!-- content injected by JS -->
+    </div>
+  </div>
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header>
+    <div style="display:flex;align-items:center;">
+      <a href="homepage.html" class="back-home-btn" title="Back to Homepage">
+        <span class="back-arrow">←</span>
+        <span class="back-label">Home</span>
+      </a>
+      <div class="header-divider"></div>
+      <a href="homepage.html" class="logo">
+        <div class="logo-icon"><img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="logo-img" /></div>
+        <div class="logo-text">Nest<span>QC</span></div>
+      </a>
+      <div class="header-divider"></div>
+      <span class="page-title">Dorm Finder</span>
+    </div>
+    <div class="header-right">
+      <div id="guest-header-btns" style="display:none; gap:8px; align-items:center;">
+        <a href="login.html"><button class="nav-btn">Sign In</button></a>
+        <a href="register.html"><button class="nav-btn primary">Sign Up</button></a>
+      </div>
+      <button class="theme-toggle" title="Toggle light/dark mode">
+        <span class="icon-dark">🌙</span>
+        <span class="icon-light">☀️</span>
+      </button>
+      <button class="menu-btn" id="menuBtn" onclick="openPanel()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="app-body">
+
+    <!-- ── LEFT: NEARBY SIDEBAR ── -->
+    <aside class="sidebar">
+      <!-- Your Location -->
+      <div class="location-card">
+        <div class="loc-label">Your Location</div>
+        <div class="loc-display">
+          <div class="loc-pulse-wrap">
+            <div class="loc-pulse"></div>
+          </div>
+          <div class="loc-text">
+            <strong id="loc-name">Current Location</strong>
+            <small id="loc-coords">Detecting via GPS…</small>
+          </div>
+          <button class="loc-refresh" title="Refresh location" onclick="detectLocation()">↻</button>
+        </div>
+      </div>
+
+      <!-- All Dorms Header -->
+      <div class="nearby-header">
+        <span class="nearby-label">All Dorms</span>
+        <span class="nearby-count" id="nearby-count">0 dorms</span>
+      </div>
+
+      <!-- Sort -->
+      <div class="sort-bar">
+        <span class="sort-label">Sort:</span>
+        <div class="sort-chips">
+          <button class="sort-chip active" onclick="sortNearby('distance',this)">Nearest</button>
+          <button class="sort-chip" onclick="sortNearby('price',this)">Price</button>
+          <button class="sort-chip" onclick="sortNearby('rating',this)">Rating</button>
+          <button class="sort-chip" onclick="sortNearby('maut', this)">⭐ Best Match</button>
+        </div>
+      </div>
+
+      <!-- Nearby List -->
+      <div class="nearby-list" id="nearby-list">
+        <!-- Populated by JS -->
+      </div>
+    </aside>
+
+    <!-- ── CENTER: MAP ── -->
+    <div class="map-container">
+      <div id="google-map">
+        <div class="map-fallback">
+          <div class="map-fallback-grid"></div>
+
+          <svg class="demo-map-svg" viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="250" x2="700" y2="250" stroke="rgba(42,138,138,0.12)" stroke-width="1"/>
+            <line x1="350" y1="0" x2="350" y2="500" stroke="rgba(42,138,138,0.12)" stroke-width="1"/>
+            <path d="M 80 200 Q 200 180 350 250 Q 480 320 620 300" stroke="rgba(42,138,138,0.2)" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M 100 400 Q 250 350 350 250 Q 450 150 600 130" stroke="rgba(201,168,76,0.12)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <path d="M 350 50 L 350 450" stroke="rgba(42,138,138,0.12)" stroke-width="4" stroke-dasharray="8 6"/>
+            <circle cx="230" cy="260" r="22" fill="rgba(224,80,80,0.15)" stroke="rgba(224,80,80,0.4)" stroke-width="1.5"/>
+            <circle cx="230" cy="260" r="9" fill="#e05050"/>
+            <text x="230" y="244" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-family="DM Sans">YOU</text>
+            <circle cx="310" cy="220" r="16" fill="rgba(42,138,138,0.15)" stroke="rgba(42,138,138,0.5)" stroke-width="1.5"/>
+            <circle cx="310" cy="220" r="7" fill="#2ab4a0"/>
+            <text x="310" y="206" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9" font-family="DM Sans">QCU</text>
+            <circle cx="450" cy="290" r="16" fill="rgba(201,168,76,0.12)" stroke="rgba(201,168,76,0.4)" stroke-width="1.5"/>
+            <circle cx="450" cy="290" r="7" fill="#c9a84c"/>
+            <text x="450" y="276" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9" font-family="DM Sans">QUE</text>
+            <circle cx="560" cy="160" r="16" fill="rgba(58,175,175,0.12)" stroke="rgba(58,175,175,0.4)" stroke-width="1.5"/>
+            <circle cx="560" cy="160" r="7" fill="#3aafaf"/>
+            <text x="560" y="146" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="9" font-family="DM Sans">EP17</text>
+            <line x1="230" y1="260" x2="310" y2="220" stroke="rgba(42,138,138,0.35)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <line x1="230" y1="260" x2="450" y2="290" stroke="rgba(201,168,76,0.25)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <line x1="230" y1="260" x2="560" y2="160" stroke="rgba(58,175,175,0.25)" stroke-width="1.5" stroke-dasharray="5 4"/>
+            <rect x="256" y="230" width="32" height="15" rx="7" fill="rgba(42,138,138,0.3)" stroke="rgba(42,138,138,0.5)" stroke-width="1"/>
+            <text x="272" y="241" text-anchor="middle" fill="#2ab4a0" font-size="8.5" font-family="DM Sans">1KM</text>
+            <rect x="325" y="278" width="32" height="15" rx="7" fill="rgba(201,168,76,0.2)" stroke="rgba(201,168,76,0.4)" stroke-width="1"/>
+            <text x="341" y="289" text-anchor="middle" fill="#c9a84c" font-size="8.5" font-family="DM Sans">3KM</text>
+            <rect x="378" y="196" width="36" height="15" rx="7" fill="rgba(58,175,175,0.2)" stroke="rgba(58,175,175,0.4)" stroke-width="1"/>
+            <text x="396" y="207" text-anchor="middle" fill="#3aafaf" font-size="8.5" font-family="DM Sans">500M</text>
+          </svg>
+
+          <div class="map-fallback-content">
+            <div class="map-api-icon">🗺</div>
+            <div class="map-api-title">Google Maps Integration</div>
+            <div class="map-api-sub">Plug in your Google Maps API key to enable live map, real-time distance, and routing.</div>
+            <div class="map-api-badge">Ready for API key</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status bar -->
+      <div class="map-status-bar">
+        <div class="map-status-dot"></div>
+        <span id="map-status-text"><span id="map-dorm-count">3</span> dorms within 3km radius · Select a dorm to view details</span>
+        &nbsp;·&nbsp; Last updated: <span>just now</span>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: DORM DETAIL + REVIEWS ── -->
+    <aside class="detail-panel" id="detail-panel">
+      <div class="dorm-info-header">
+        <div class="dorm-img-strip">
+          <div class="dorm-img-bg" id="dorm-img-bg">🏠</div>
+          <button class="fav-btn" id="fav-btn" onclick="toggleFav()" title="Save dorm">🤍</button>
+        </div>
+        <div class="dorm-title-row">
+          <div class="dorm-name-main" id="dorm-name">Select a dorm</div>
+          <div class="dorm-price-tag" id="dorm-price"></div>
+        </div>
+        <div class="dorm-loc-row">
+          📍 <span id="dorm-loc"></span>
+        </div>
+        <div class="dorm-rating-row">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="stars-row" id="dorm-stars"></div>
+            <span class="rating-score" id="dorm-score"></span>
+            <span class="rating-count" id="dorm-rcount"></span>
+          </div>
+          <button class="write-review-btn" onclick="viewDormDetails()">View Details</button>
+        </div>
+        <div class="dorm-tags-row" id="dorm-tags"></div>
+      </div>
+
+      <div class="reviews-section">
+        <div class="reviews-top">
+          <span class="reviews-label">Recent Reviews</span>
+          <button class="write-review-btn" onclick="openReviewModal()">✏ Review</button>
+        </div>
+        <div class="reviews-list" id="reviews-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ══════════ STATUS FOOTER ══════════ -->
+  <div class="status-footer">
+    <div class="status-left">
+      <div class="status-item">
+        <div class="status-dot"></div>
+        <span><strong id="sf-count">3</strong> dorms within 3km</span>
+      </div>
+      <div class="status-item">📍 Select a dorm to view details</div>
+    </div>
+    <div class="status-right">Last updated: just now</div>
+  </div>
+
+  <!-- ══════════ REVIEW MODAL ══════════ -->
+  <div class="review-modal-overlay" id="review-modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="review-modal" id="review-modal">
+      <div class="modal-header">
+        <div class="modal-title">Reviews · <span id="modal-dorm-name"></span></div>
+        <button class="modal-close" onclick="closeReviewModal()">✕</button>
+      </div>
+
+      <div class="write-review-area">
+        <div class="wr-label">Write a Review</div>
+        <div class="wr-stars-pick" id="wr-stars">
+          <span class="wr-star-pick" data-v="1" onclick="setRating(1)">★</span>
+          <span class="wr-star-pick" data-v="2" onclick="setRating(2)">★</span>
+          <span class="wr-star-pick" data-v="3" onclick="setRating(3)">★</span>
+          <span class="wr-star-pick" data-v="4" onclick="setRating(4)">★</span>
+          <span class="wr-star-pick" data-v="5" onclick="setRating(5)">★</span>
+          <span class="wr-rating-text" id="wr-rating-text">Tap to rate</span>
+        </div>
+        <textarea class="wr-textarea" id="wr-text" placeholder="Share your experience — cleanliness, amenities, location, value…" maxlength="400" oninput="updateChar()"></textarea>
+        <div class="wr-footer">
+          <span class="wr-char" id="wr-char">0 / 400</span>
+          <button class="wr-submit" onclick="submitReview()">Post Review</button>
+        </div>
+      </div>
+
+      <div class="modal-reviews" id="modal-reviews-list">
+        <div class="modal-review-header">
+          <span class="mri-label" id="modal-review-count">Loading…</span>
+          <div class="modal-sort">
+            <button class="modal-sort-btn active" onclick="sortReviews('newest',this)">Newest</button>
+            <button class="modal-sort-btn" onclick="sortReviews('highest',this)">Highest</button>
+            <button class="modal-sort-btn" onclick="sortReviews('lowest',this)">Lowest</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ TOAST ══════════ -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toast-msg">Review posted!</span>
+  </div>
+
+  <!-- ══════════ EDIT PROFILE MODAL ══════════ -->
+  <div class="edit-modal-overlay" id="editModalOverlay" onclick="handleEditOverlayClick(event)">
+    <div class="edit-modal" id="editModal">
+      <div class="edit-modal-header">
+        <div class="edit-modal-title">Edit Profile</div>
+        <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="edit-modal-body">
+        <div class="edit-avatar-row">
+          <div class="edit-avatar-preview" id="editAvatarPreview">
+            J
+            <input type="file" accept="image/*" onchange="previewAvatar(event)" />
+          </div>
+          <div class="edit-avatar-info">
+            <strong>Profile Photo</strong>
+            <span>Click avatar to upload a new photo</span>
+          </div>
+        </div>
+        <div class="edit-tabs">
+          <button class="edit-tab active" onclick="switchEditTab('info', this)">Personal Info</button>
+          <button class="edit-tab" onclick="switchEditTab('password', this)">Change Password</button>
+        </div>
+        <div class="edit-tab-content active" id="tab-info">
+          <div class="edit-alert" id="infoAlert"><span></span><span id="infoAlertText"></span></div>
+          <div class="edit-form-row">
+            <div class="edit-form-group">
+              <label class="edit-form-label">First Name</label>
+              <input class="edit-form-input" type="text" id="editFname" placeholder="Juan" />
+            </div>
+            <div class="edit-form-group">
+              <label class="edit-form-label">Last Name</label>
+              <input class="edit-form-input" type="text" id="editLname" placeholder="Dela Cruz" />
+            </div>
+          </div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Middle Name <span class="optional">(optional)</span></label>
+            <input class="edit-form-input" type="text" id="editMname" placeholder="Santos" />
+          </div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Username</label>
+            <input class="edit-form-input" type="text" id="editUname" placeholder="juandelacruz" />
+          </div>
+          <button class="edit-save-btn" id="saveInfoBtn" onclick="saveProfileInfo()">Save Changes</button>
+        </div>
+        <div class="edit-tab-content" id="tab-password">
+          <div class="edit-alert" id="pwAlert"><span></span><span id="pwAlertText"></span></div>
+          <div class="edit-form-group">
+            <label class="edit-form-label">Current Password</label>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="currentPw" placeholder="Enter current password" style="padding-right:55px" />
+              <button class="pw-toggle" type="button" onclick="togglePw('currentPw',this)">Show</button>
+            </div>
+          </div>
+                      <div class="edit-form-group">
+            <label class="edit-form-label">New Password</label>
+            <!-- Register-style strength widget -->
+            <div class="edit-pw-strength-box" id="editPwStrength">
+              <div class="edit-pw-bars">
+                <div class="edit-pw-bar" id="pwBar1"></div>
+                <div class="edit-pw-bar" id="pwBar2"></div>
+                <div class="edit-pw-bar" id="pwBar3"></div>
+                <div class="edit-pw-bar" id="pwBar4"></div>
+                <div class="edit-pw-bar" id="pwBar5"></div>
+              </div>
+              <div class="edit-pw-legend">
+                <div class="edit-pw-leg" id="req-length"><span class="edit-pw-dot" id="dot-length"></span>Min. 8 characters</div>
+                <div class="edit-pw-leg" id="req-upper"><span class="edit-pw-dot" id="dot-upper"></span>Uppercase letter</div>
+                <div class="edit-pw-leg" id="req-lower"><span class="edit-pw-dot" id="dot-lower"></span>Lowercase letter</div>
+                <div class="edit-pw-leg" id="req-number"><span class="edit-pw-dot" id="dot-number"></span>Number (0–9)</div>
+                <div class="edit-pw-leg" id="req-special"><span class="edit-pw-dot" id="dot-special"></span>Special character (@, #, !…)</div>
+              </div>
+            </div>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="newPw" placeholder="Enter new password" style="padding-right:55px" oninput="checkPwStrength()" onfocus="showEditPwHint()" onblur="hideEditPwHint()" />
+              <button class="pw-toggle" type="button" onclick="togglePw('newPw',this)">Show</button>
+            </div>
+          </div>
+
+          <div class="edit-form-group">
+            <label class="edit-form-label">Confirm New Password</label>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="confirmPw" placeholder="Re-enter new password" style="padding-right:55px" />
+              <button class="pw-toggle" type="button" onclick="togglePw('confirmPw',this)">Show</button>
+            </div>
+          </div>
+          <button class="edit-save-btn" id="savePwBtn" onclick="savePassword()">Change Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="dormfinder.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB6Pc8f03gTqPPmlAWfbhVNESDKYCdut3Q&libraries=places,geometry,routes&callback=initMap" async defer></script>
+  <script src="editprofile.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>

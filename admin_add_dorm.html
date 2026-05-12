@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NestQC Admin · Add Dorm</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin_common.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .img-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .img-slot {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--text-soft);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .img-slot:hover { border-color: rgba(42,138,138,0.5); }
+    .img-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .img-slot .slot-label {
+      font-size: 0.72rem;
+      margin-top: 6px;
+      color: var(--text-soft);
+      position: relative;
+      z-index: 1;
+    }
+    .img-slot .slot-icon { position: relative; z-index: 1; }
+    .img-slot.has-img .slot-icon,
+    .img-slot.has-img .slot-label { display: none; }
+    .img-slot .remove-btn {
+      display: none;
+      position: absolute;
+      top: 6px; right: 6px;
+      background: rgba(0,0,0,0.6);
+      border: none; color: #fff;
+      border-radius: 50%; width: 24px; height: 24px;
+      cursor: pointer; font-size: 0.75rem;
+      align-items: center; justify-content: center;
+      z-index: 2;
+    }
+    .img-slot.has-img .remove-btn { display: flex; }
+    .amenities-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .amenity-tag {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px;
+      cursor: pointer; font-size: 0.78rem;
+      user-select: none; transition: all 0.2s;
+    }
+    .amenity-tag.active {
+      background: rgba(42,138,138,0.15);
+      border-color: rgba(42,138,138,0.3);
+      color: var(--teal-light);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+  <img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="sidebar-logo-img" />
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin_dashboard.html" class="nav-icon">
+        <span>☰</span><span class="nav-label">Dashboard</span>
+        <span class="nav-tooltip">Dashboard</span></a>
+      <a href="admin_dorms.html" class="nav-icon">
+        <span>🏠</span><span class="nav-label">Manage Dorms</span>
+        <span class="nav-tooltip">Manage Dorms</span></a>
+      <a href="admin_users.html" class="nav-icon">
+        <span>👥</span><span class="nav-label">Users</span>
+        <span class="nav-tooltip">Users</span></a>
+      <a href="admin_chat.html" class="nav-icon">
+        <span>💬</span><span class="nav-label">Support Chat</span>
+        <span class="nav-tooltip">Support Chat</span></a>
+      <a href="admin_add_dorm.html" class="nav-icon active">
+        <span>➕</span><span class="nav-label">Add Dorm</span>
+        <span class="nav-tooltip">Add Dorm</span></a>
+      <a href="admin_archive.html" class="nav-icon">
+  <span>🗃️</span><span class="nav-label">Archive</span>
+  <span class="nav-tooltip">Archive</span>
+</a>
+    </nav>
+    <div class="nav-icon" onclick="toggleTheme()">
+      <span class="icon-dark">🌙</span>
+      <span class="icon-light">☀️</span>
+      <span class="nav-label icon-dark">Light Mode</span>
+      <span class="nav-label icon-light">Dark Mode</span>
+      <span class="nav-tooltip icon-dark">Switch to Light</span>
+      <span class="nav-tooltip icon-light">Switch to Dark</span>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="nav-icon" onclick="logout()"><span>👤</span><span class="nav-label">Logout</span><span class="nav-tooltip">Logout</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-heading">
+      <div class="page-title">Add New Dorm</div>
+      <div class="page-subtitle">Create a comprehensive dorm listing</div>
+    </div>
+
+    <!-- Dorm Images -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Dorm Images</div>
+        <span style="font-size:0.78rem;color:var(--text-soft);">Upload up to 3 photos</span>
+      </div>
+      <div class="card-body">
+        <div class="img-upload-grid">
+          <div class="img-slot" id="slot0" onclick="triggerUpload(0)">
+            <span class="slot-icon">📷</span>
+            <span class="slot-label">Main Photo</span>
+            <button class="remove-btn" onclick="removeImage(event,0)">✕</button>
+          </div>
+          <div class="img-slot" id="slot1" onclick="triggerUpload(1)">
+            <span class="slot-icon">📷</span>
+            <span class="slot-label">Photo 2</span>
+            <button class="remove-btn" onclick="removeImage(event,1)">✕</button>
+          </div>
+          <div class="img-slot" id="slot2" onclick="triggerUpload(2)">
+            <span class="slot-icon">📷</span>
+            <span class="slot-label">Photo 3</span>
+            <button class="remove-btn" onclick="removeImage(event,2)">✕</button>
+          </div>
+        </div>
+        <div class="form-hint" style="margin-top:10px;">Click a slot to upload. Recommended size: 1200×800px. First photo is the main display image.</div>
+        <input type="file" id="imgUpload0" accept="image/*" style="display:none" onchange="handleImageUpload(event,0)">
+        <input type="file" id="imgUpload1" accept="image/*" style="display:none" onchange="handleImageUpload(event,1)">
+        <input type="file" id="imgUpload2" accept="image/*" style="display:none" onchange="handleImageUpload(event,2)">
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Basic Information</div></div>
+      <div class="card-body">
+        <div class="form-row single">
+          <div class="form-group"><label class="form-label">Dorm Name</label><input class="form-input" id="dname" placeholder="Type here..."></div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group"><label class="form-label">Address</label><input class="form-input" id="address" placeholder="Type here..."></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Pricing</div></div>
+      <div class="card-body">
+        <div class="form-row single">
+          <div class="form-group">
+            <label class="form-label">Monthly Rent</label>
+            <input class="form-input" type="number" id="price" step="0.01" placeholder="0.00">
+            <span class="form-hint">Enter the monthly rental price</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Description</div></div>
+      <div class="card-body">
+        <div class="form-row single">
+          <div class="form-group">
+            <label class="form-label">About this Dorm</label>
+            <textarea class="form-input" id="description" rows="5" placeholder="Describe the dorm — its atmosphere, proximity to universities, room types, house rules, etc." style="resize:vertical;min-height:120px;font-family:inherit;line-height:1.6;"></textarea>
+            <span class="form-hint">This will appear in the dorm detail page under "About".</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location Coordinates -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Location Coordinates</div></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Latitude</label><input class="form-input" type="number" step="any" id="lat" placeholder="14.6760"></div>
+          <div class="form-group"><label class="form-label">Longitude</label><input class="form-input" type="number" step="any" id="lng" placeholder="121.0437"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amenities -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Amenities &amp; Features</div></div>
+      <div class="card-body amenities-grid" id="amenitiesGrid"></div>
+    </div>
+
+    <!-- Owner Contact -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Contact Information</div></div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Dorm Website</label><input class="form-input" id="website" placeholder="https://..."></div>
+          <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="phone" placeholder="+63 9XX XXX XXXX"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="email" placeholder="dorm@email.com"></div>
+          <div class="form-group"><label class="form-label">Facebook URL</label><input class="form-input" id="facebook" placeholder="https://facebook.com/..."></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; gap:12px;">
+      <button class="btn btn-primary" onclick="saveNewDorm()">Add Dorm</button>
+      <button class="btn btn-ghost" onclick="window.location.href='admin_dorms.html'">Cancel</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="theme.js"></script>
+  <script src="admin_add_dorm.js"></script>
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('session.php');
+        const data = await res.json();
+        if (!data.loggedIn || data.user.role !== 'admin') window.location.href = 'login.html';
+      } catch { window.location.href = 'login.html'; }
+    })();
+  </script>
+</body>
+</html>

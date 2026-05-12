@@ -1,0 +1,755 @@
+/* ═══════════════════════════════════════════════════════
+   NestQC — Shared Theme (Dark ↔ Light)
+   Link this in every page: <link rel="stylesheet" href="theme.css">
+   ═══════════════════════════════════════════════════════ */
+
+body,
+body::before,
+body::after,
+.sidebar, .side-panel, .liked-panel,
+.card, .stat-card, .dorm-card, .dorm-item,
+.nav-icon, .form-input, .form-select,
+.btn, header, footer, .modal, .toast {
+  transition:
+    background-color 0.3s ease,
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* ══════════════════════════════════════
+   THEME TOGGLE BUTTON
+══════════════════════════════════════ */
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(201,168,76,0.25);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.theme-toggle:hover {
+  border-color: rgba(201,168,76,0.55);
+  background: rgba(201,168,76,0.08);
+}
+
+/* Hide the light icon/labels by default (dark mode) */
+.icon-light { display: none; }
+
+/* In light mode, swap which ones show */
+body.light .icon-dark  { display: none; }
+body.light .icon-light { display: inline; }
+
+.sidebar .nav-icon .icon-dark,
+.sidebar .nav-icon .icon-light {
+  width: 2.1 rem;
+  text-align: center;
+}
+/* ══════════════════════════════════════
+   LIGHT MODE — ROOT VARIABLES
+══════════════════════════════════════ */
+body.light {
+  --navy:       #f0f4f8;
+  --navy-mid:   #e2e9f0;
+  --cream:      #1a2a3a;
+  --gold:       #a67c20;
+  --gold-light: #c49a2a;
+  --teal:       #1f7070;
+  --teal-light: #2a9090;
+  --white:      #1a2535;
+  --text-soft:  #4a6070;
+  --card-bg:    rgba(0,0,0,0.04);
+  --card-border: rgba(100,130,160,0.25);
+
+  background-color: #f0f4f8;
+  color: #1a2535;
+}
+
+/* ── BACKGROUNDS ── */
+body.light .bg-layer {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(42,138,138,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 10% 80%, rgba(180,140,40,0.07) 0%, transparent 55%),
+    linear-gradient(160deg, #dce8f4 0%, #e8f0f8 45%, #ddeaf5 100%);
+}
+body.light .bg-grid {
+  background-image:
+    linear-gradient(rgba(42,100,140,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42,100,140,0.06) 1px, transparent 1px);
+}
+
+/* ── HEADER ── */
+body.light header {
+  background: rgba(230,240,250,0.88);
+  border-bottom-color: rgba(100,140,180,0.2);
+}
+body.light .logo-text         { color: #1a2535; }
+body.light .logo-text span    { color: var(--gold); }
+body.light .page-label,
+body.light .dorm-name-header  { color: var(--text-soft); }
+
+body.light .back-btn {
+  color: var(--text-soft);
+  border-color: rgba(42,100,140,0.2);
+}
+body.light .back-btn:hover {
+  color: var(--teal);
+  border-color: var(--teal);
+  background: rgba(42,100,140,0.06);
+}
+body.light .header-divider { background: rgba(42,100,140,0.18); }
+
+/* Nav buttons */
+body.light .nav-btn {
+  border-color: rgba(42,100,140,0.3);
+  color: #1a2535;
+}
+body.light .nav-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: rgba(42,138,138,0.06);
+}
+body.light .nav-btn.primary {
+  background: linear-gradient(135deg, var(--teal), #155858);
+  border-color: var(--teal);
+  color: #fff;
+}
+
+/* Hamburger */
+body.light .menu-btn            { border-color: rgba(42,100,140,0.25); }
+body.light .menu-btn span       { background: #1a2535; }
+body.light .menu-btn:hover      { border-color: var(--teal); }
+body.light .menu-btn:hover span { background: var(--teal); }
+
+/* Theme toggle in light mode */
+body.light .theme-toggle {
+  border-color: rgba(42,100,140,0.3);
+}
+body.light .theme-toggle:hover {
+  border-color: var(--teal);
+  background: rgba(42,138,138,0.08);
+}
+
+/* ── SIDE PANELS ── */
+body.light .side-panel {
+  background: rgba(230,240,250,0.97);
+  border-left-color: rgba(100,140,180,0.2);
+}
+body.light .panel-header        { border-bottom-color: rgba(100,140,180,0.15); }
+body.light .panel-title         { color: var(--gold); }
+body.light .close-btn           { color: var(--text-soft); }
+body.light .close-btn:hover     { color: #1a2535; }
+body.light .panel-user          { border-bottom-color: rgba(0,0,0,0.07); }
+body.light .user-name           { color: #1a2535; }
+body.light .panel-item          { color: #1a2535; }
+body.light .panel-item:hover    { background: rgba(42,138,138,0.08); color: var(--teal); }
+body.light .panel-logout        { border-top-color: rgba(0,0,0,0.07); color: #c04040; }
+body.light .panel-logout:hover  { background: rgba(200,60,60,0.07); }
+
+body.light .liked-panel {
+  background: #e8f0f8;
+  border-left-color: rgba(100,140,180,0.18);
+}
+
+body.light .overlay { background: rgba(180,200,220,0.5); }
+
+/* ── DORM CARDS (browse & homepage grid) ── */
+body.light .dorm-card {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(100,140,180,0.2);
+  box-shadow: 0 2px 16px rgba(42,80,120,0.08);
+}
+body.light .dorm-card:hover {
+  border-color: rgba(42,138,138,0.35);
+  box-shadow: 0 8px 32px rgba(42,80,120,0.14);
+}
+body.light .card-name           { color: #1a2535; }
+body.light .card-location       { color: var(--text-soft); }
+body.light .card-price          { color: var(--teal); }
+body.light .card-amenity        { background: rgba(42,138,138,0.08); color: var(--teal); }
+
+/* ── SEARCH / CHIPS ── */
+body.light .search-input-wrap {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(100,140,180,0.25);
+}
+body.light .search-input        { color: #1a2535; }
+body.light .search-input::placeholder { color: rgba(74,96,112,0.55); }
+body.light .sort-chip,
+body.light .home-sort-chip {
+  background: rgba(255,255,255,0.7);
+  border-color: rgba(100,140,180,0.25);
+  color: var(--text-soft);
+}
+body.light .sort-chip.active,
+body.light .home-sort-chip.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+body.light .sort-chip:hover,
+body.light .home-sort-chip:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── HERO ── */
+body.light .hero h1             { color: #1a2535; }
+body.light .hero h1 em         { color: var(--gold); }
+body.light .hero p              { color: var(--text-soft); }
+body.light .hero-tag {
+  background: rgba(42,138,138,0.09);
+  border-color: rgba(42,138,138,0.2);
+  color: var(--teal);
+}
+
+/* CTA buttons */
+body.light .cta-btn {
+  background: linear-gradient(135deg, var(--teal), #155858);
+  color: #fff;
+}
+body.light .cta-ghost {
+  border-color: rgba(42,100,140,0.3);
+  color: #1a2535;
+}
+body.light .cta-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ── SECTION ── */
+body.light .section-title       { color: #1a2535; }
+body.light .section-divider     { background: rgba(42,100,140,0.12); }
+
+/* ── MODALS (edit profile, vacancy, review) ── */
+body.light .edit-modal,
+body.light .modal-box,
+body.light .edit-modal-overlay .edit-modal {
+  background: #eaf2fa;
+  border-color: rgba(100,140,180,0.25);
+}
+body.light .edit-modal-header,
+body.light .modal-header,
+body.light .edit-modal-header {
+  border-bottom-color: rgba(100,140,180,0.15);
+}
+body.light .edit-modal-title,
+body.light .modal-title         { color: var(--gold); }
+body.light .edit-modal-close,
+body.light .modal-close         { color: var(--text-soft); }
+body.light .edit-modal-close:hover,
+body.light .modal-close:hover   { color: #1a2535; background: rgba(0,0,0,0.06); }
+
+body.light .edit-form-label,
+body.light .review-form-label   { color: var(--text-soft); }
+body.light .edit-form-input,
+body.light .review-textarea,
+body.light .form-input {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(100,140,180,0.3);
+  color: #1a2535;
+}
+body.light .edit-form-input::placeholder,
+body.light .review-textarea::placeholder,
+body.light .form-input::placeholder { color: rgba(74,96,112,0.45); }
+body.light .edit-form-input:focus,
+body.light .review-textarea:focus,
+body.light .form-input:focus {
+  border-color: rgba(42,138,138,0.55);
+  background: rgba(42,138,138,0.04);
+}
+
+body.light .edit-tabs           { border-bottom-color: rgba(100,140,180,0.15); }
+body.light .edit-tab            { color: var(--text-soft); }
+body.light .edit-tab.active     { color: var(--teal); border-bottom-color: var(--teal); }
+body.light .edit-tab:hover      { color: var(--teal); }
+
+body.light .edit-avatar-row     { border-bottom-color: rgba(100,140,180,0.12); }
+body.light .edit-avatar-info strong { color: #1a2535; }
+body.light .edit-avatar-info span   { color: var(--text-soft); }
+
+body.light .pw-toggle,
+body.light .toggle-pw           { color: var(--text-soft); }
+body.light .pw-toggle:hover,
+body.light .toggle-pw:hover     { color: var(--teal); }
+
+body.light .modal-desc,
+body.light .forgot-desc         { color: var(--text-soft); }
+
+/* Vacancy options */
+body.light .vacancy-opt {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(100,140,180,0.2);
+  color: #1a2535;
+}
+body.light .vacancy-opt:hover   { background: rgba(255,255,255,0.85); }
+body.light .vopt-sub            { color: var(--text-soft); }
+
+/* ── LOGIN / REGISTER PAGES ── */
+body.light .left-panel,
+body.light .right-panel {
+  border-color: rgba(100,140,180,0.18);
+}
+body.light .left-heading        { color: #1a2535; }
+body.light .left-heading em,
+body.light .panel-heading em   { color: var(--gold); }
+body.light .left-desc,
+body.light .panel-desc         { color: var(--text-soft); }
+body.light .left-tag           { color: var(--teal); }
+
+body.light .feature {
+  background: rgba(255,255,255,0.55);
+  border-color: rgba(100,140,180,0.15);
+}
+body.light .feature:hover {
+  background: rgba(42,138,138,0.07);
+  border-color: rgba(42,138,138,0.2);
+}
+body.light .feature-text strong { color: #1a2535; }
+body.light .feature-text span   { color: var(--text-soft); }
+
+body.light .card-title          { color: #1a2535; }
+body.light .card-subtitle       { color: var(--text-soft); }
+
+body.light .remember-label      { color: var(--text-soft); }
+body.light .forgot-link         { color: var(--teal); }
+body.light .forgot-link:hover   { color: var(--gold); }
+body.light .signup-row,
+body.light .signin-row          { color: var(--text-soft); }
+
+body.light .section-divider-line {
+  color: rgba(74,96,112,0.4);
+}
+
+/* Steps (register) */
+body.light .step-num            { background: rgba(42,138,138,0.1); color: var(--teal); }
+body.light .step-info strong    { color: #1a2535; }
+body.light .step-info span      { color: var(--text-soft); }
+
+/* ── DORM DETAIL PAGE ── */
+body.light .detail-hero-overlay { background: linear-gradient(to bottom, rgba(220,235,248,0.3), rgba(220,235,248,0.85)); }
+body.light .dorm-title          { color: #1a2535; }
+body.light .dorm-subtitle       { color: var(--text-soft); }
+body.light .about-text          { color: #2a3a4a; }
+
+body.light .info-card,
+body.light .review-card {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(100,140,180,0.2);
+}
+body.light .info-label          { color: var(--text-soft); }
+body.light .info-value          { color: #1a2535; }
+body.light .amenity-tag         { background: rgba(42,138,138,0.09); color: var(--teal); }
+
+body.light .review-card         { background: rgba(255,255,255,0.75); border-color: rgba(100,140,180,0.18); }
+body.light .review-author       { color: #1a2535; }
+body.light .review-text         { color: #2a3a4a; }
+body.light .review-date         { color: var(--text-soft); }
+
+/* ── DORMFINDER MAP PAGE ── */
+body.light .map-sidebar {
+  background: rgba(230,240,250,0.95);
+  border-right-color: rgba(100,140,180,0.2);
+}
+body.light .map-dorm-item       { border-bottom-color: rgba(100,140,180,0.12); }
+body.light .map-dorm-item:hover { background: rgba(42,138,138,0.06); }
+body.light .map-dorm-name       { color: #1a2535; }
+body.light .map-dorm-meta       { color: var(--text-soft); }
+
+/* ── FOOTER ── */
+body.light footer               { border-top-color: rgba(100,140,180,0.15); }
+body.light .footer-logo         { color: #1a2535; }
+body.light .footer-copy         { color: var(--text-soft); }
+
+/* ── TOAST ── */
+body.light .toast {
+  background: rgba(230,240,250,0.97);
+  border-color: rgba(42,138,138,0.25);
+  color: var(--teal);
+}
+
+/* ── FORGOT PASSWORD MODAL ── */
+body.light .forgot-modal {
+  background: #eaf2fa;
+  border-color: rgba(100,140,180,0.25);
+}
+body.light .forgot-title        { color: #1a2535; }
+body.light .forgot-close        { color: var(--text-soft); }
+body.light .forgot-close:hover  { color: #1a2535; background: rgba(0,0,0,0.06); }
+
+/* ── LEGAL MODAL ── */
+body.light .legal-modal {
+  background: #eaf2fa;
+  border-color: rgba(100,140,180,0.25);
+}
+body.light .legal-header        { border-bottom-color: rgba(100,140,180,0.18); }
+body.light .legal-title         { color: #1a2535; }
+body.light .legal-body          { color: rgba(30,50,70,0.85); }
+body.light .legal-body h3       { color: var(--teal); }
+
+/* ── PW STRENGTH WIDGET ── */
+body.light .pw-requirements,
+body.light .edit-pw-strength-box {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(100,140,180,0.25);
+}
+body.light .pw-legend-text,
+body.light .edit-pw-leg         { color: rgba(74,96,112,0.7); }
+
+/* ── LIKED DORM CARDS ── */
+body.light .liked-dorm-card {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(100,140,180,0.18);
+}
+body.light .liked-dorm-card:hover { background: rgba(255,255,255,0.9); }
+body.light .liked-dorm-name     { color: #1a2535; }
+body.light .liked-dorm-location { color: var(--text-soft); }
+body.light .liked-dorm-meta     { color: var(--text-soft); }
+
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN PANEL — LIGHT MODE OVERRIDES
+   Covers: sidebar, cards, forms, tables, chat, modals
+   ═══════════════════════════════════════════════════════ */
+
+/* ── BACKGROUND ── */
+body.light .bg-layer {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(42,138,138,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 10% 80%, rgba(180,140,40,0.05) 0%, transparent 55%),
+    linear-gradient(160deg, #dce8f4 0%, #e8f0f8 45%, #ddeaf5 100%);
+}
+body.light .bg-grid {
+  background-image:
+    linear-gradient(rgba(42,100,140,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42,100,140,0.06) 1px, transparent 1px);
+}
+
+/* ── SIDEBAR ── */
+body.light .sidebar {
+  background: #d8e8f5;
+  border-right-color: rgba(100,140,180,0.25);
+}
+body.light .sidebar-logo {
+  background: linear-gradient(135deg, var(--teal), var(--gold));
+}
+body.light .nav-icon {
+  color: #3a5a70;
+}
+body.light .nav-icon:hover {
+  background: rgba(42,138,138,0.1);
+  color: var(--teal);
+}
+body.light .nav-icon.active {
+  background: rgba(42,138,138,0.15);
+  border-color: rgba(42,138,138,0.35);
+  color: var(--teal);
+}
+body.light .nav-tooltip {
+  background: #e8f2fa;
+  border-color: rgba(100,140,180,0.3);
+  color: #2a4a60;
+}
+
+/* ── MAIN AREA ── */
+body.light .main {
+  color: #1a2535;
+}
+body.light .page-title   { color: #1a2535; }
+body.light .page-subtitle { color: #4a6070; }
+
+/* ── CARDS ── */
+body.light .card {
+  background: rgba(255,255,255,0.82);
+  border-color: rgba(100,140,180,0.2);
+  box-shadow: 0 2px 16px rgba(42,80,120,0.07);
+}
+body.light .card-header {
+  border-bottom-color: rgba(100,140,180,0.15);
+}
+body.light .card-title { color: #1a2535; }
+
+/* ── FORMS ── */
+body.light .form-label  { color: #4a6070; }
+body.light .form-input,
+body.light .form-select,
+body.light .form-textarea {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(100,140,180,0.3);
+  color: #1a2535;
+}
+body.light .form-input::placeholder,
+body.light .form-textarea::placeholder { color: rgba(74,96,112,0.45); }
+body.light .form-input:focus,
+body.light .form-select:focus,
+body.light .form-textarea:focus {
+  border-color: rgba(42,138,138,0.55);
+  background: rgba(255,255,255,0.95);
+}
+body.light .form-hint { color: #5a7a90; }
+
+/* ── BUTTONS ── */
+body.light .btn-ghost {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(100,140,180,0.3);
+  color: #3a5a70;
+}
+body.light .btn-ghost:hover {
+  border-color: rgba(42,138,138,0.5);
+  color: var(--teal);
+  background: rgba(42,138,138,0.06);
+}
+body.light .btn-danger {
+  background: rgba(224,80,80,0.08);
+  border-color: rgba(224,80,80,0.3);
+  color: #c04040;
+}
+body.light .btn-warning {
+  background: rgba(180,130,30,0.1);
+  border-color: rgba(180,130,30,0.3);
+  color: #8a6010;
+}
+body.light .btn-warning:hover {
+  background: rgba(180,130,30,0.18);
+  border-color: rgba(180,130,30,0.5);
+}
+
+/* ── DORM LIST (manage dorms / archive) ── */
+body.light .dorm-item {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(100,140,180,0.18);
+}
+body.light .dorm-item:hover {
+  border-color: rgba(42,138,138,0.35);
+}
+body.light .dorm-name { color: #1a2535; }
+body.light .dorm-meta { color: #4a6070; }
+
+body.light .archived-badge {
+  background: rgba(160,120,20,0.1);
+  border-color: rgba(160,120,20,0.3);
+  color: #8a6010;
+}
+body.light .archive-count {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(100,140,180,0.2);
+  color: #4a6070;
+}
+
+/* ── USERS TABLE ── */
+body.light .user-table th {
+  color: #4a6070;
+  border-bottom-color: rgba(100,140,180,0.2);
+}
+body.light .user-table td {
+  color: #1a2535;
+  border-bottom-color: rgba(100,140,180,0.1);
+}
+body.light .role-badge.user {
+  background: rgba(42,138,138,0.1);
+  color: var(--teal);
+}
+body.light .role-badge.admin {
+  background: rgba(160,120,20,0.1);
+  color: #8a6010;
+}
+
+/* ── SUPPORT CHAT ── */
+body.light .chat-split {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(100,140,180,0.2);
+}
+body.light .user-pane {
+  background: rgba(220,235,248,0.6);
+  border-right-color: rgba(100,140,180,0.2);
+}
+body.light .user-card {
+  border-bottom-color: rgba(100,140,180,0.12);
+}
+body.light .user-card:hover,
+body.light .user-card.active {
+  background: rgba(42,138,138,0.09);
+}
+body.light .user-card-name  { color: #1a2535; }
+body.light .user-card-email,
+body.light .user-card-phone { color: #4a6070; }
+body.light .user-card-last  { color: #3a5a70; }
+
+body.light .conv-header {
+  border-bottom-color: rgba(100,140,180,0.15);
+}
+body.light .conv-header-name  { color: #1a2535; }
+body.light .conv-header-contact { color: var(--teal); }
+
+body.light .msg-bubble.user {
+  background: rgba(200,220,240,0.55);
+  color: #1a2535;
+}
+body.light .msg-bubble.admin {
+  background: var(--teal);
+  color: #fff;
+}
+
+body.light .reply-area {
+  background: rgba(220,235,248,0.5);
+  border-top-color: rgba(100,140,180,0.15);
+}
+
+/* ── ADD USER MODAL ── */
+body.light .modal-overlay { background: rgba(160,190,220,0.45); }
+body.light .modal {
+  background: #eaf2fa;
+  border-color: rgba(100,140,180,0.3);
+}
+
+/* ── IMAGE UPLOAD SLOTS (add dorm) ── */
+body.light .img-slot {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(100,140,180,0.3);
+}
+body.light .img-slot:hover {
+  border-color: rgba(42,138,138,0.5);
+}
+body.light .slot-label { color: #4a6070; }
+
+/* ── AMENITY TAGS ── */
+body.light .amenity-tag {
+  background: rgba(255,255,255,0.6);
+  border-color: rgba(100,140,180,0.25);
+  color: #3a5a70;
+}
+body.light .amenity-tag.active {
+  background: rgba(42,138,138,0.12);
+  border-color: rgba(42,138,138,0.35);
+  color: var(--teal);
+}
+
+/* ── TOAST ── */
+body.light .toast {
+  background: rgba(230,242,252,0.97);
+  border-color: rgba(42,138,138,0.3);
+  color: var(--teal);
+}
+body.light .toast.error {
+  border-color: rgba(224,80,80,0.35);
+  color: #c04040;
+}
+
+/* ── SCROLLBAR ── */
+body.light ::-webkit-scrollbar-thumb {
+  background: rgba(42,100,140,0.18);
+}
+
+/* Dashboard stat cards */
+body.light .stat-card {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(100,140,180,0.2);
+  box-shadow: 0 2px 16px rgba(42,80,120,0.07);
+}
+body.light .stat-value { color: #1a2535; }
+body.light .stat-label { color: #4a6070; }
+
+/* Recent messages */
+body.light .recent-msg {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(100,140,180,0.18);
+}
+body.light .msg-user  { color: var(--teal); }
+body.light .msg-time  { color: #4a6070; }
+body.light .msg-preview { color: #2a3a4a; }
+/* ══════════════════════════════════════════════════════
+   DORM FINDER — RIGHT DETAIL PANEL (LIGHT MODE FIX)
+   Fixes grey/invisible panel contents in light mode
+══════════════════════════════════════════════════════ */
+
+/* ── Detail panel wrapper ── */
+body.light .detail-panel {
+  background: rgba(230,240,250,0.97);
+  border-left-color: rgba(100,140,180,0.2);
+  color: #1a2535;
+}
+
+/* ── Dorm image strip / header area ── */
+body.light .dorm-info-header {
+  background: rgba(220,235,248,0.6);
+  border-bottom-color: rgba(100,140,180,0.15);
+}
+body.light .dorm-img-strip {
+  background: rgba(200,220,240,0.5);
+}
+body.light .dorm-img-bg {
+  background: rgba(200,220,240,0.7);
+  color: #1a2535;
+}
+
+/* ── Dorm title / name / price ── */
+body.light .dorm-name-main { color: #1a2535; }
+body.light .dorm-price-tag {
+  color: var(--teal);
+  background: rgba(42,138,138,0.1);
+  border-color: rgba(42,138,138,0.2);
+}
+
+/* ── Location & rating rows ── */
+body.light .dorm-loc-row   { color: var(--text-soft); }
+body.light .dorm-rating-row { color: #1a2535; }
+body.light .rating-score   { color: #1a2535; }
+body.light .rating-count   { color: var(--text-soft); }
+
+/* ── Tags / amenity chips ── */
+body.light .dorm-tags-row .dorm-tag,
+body.light .dorm-tags-row span {
+  background: rgba(42,138,138,0.09);
+  color: var(--teal);
+  border-color: rgba(42,138,138,0.2);
+}
+
+/* ── Favourite button ── */
+body.light .fav-btn {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(100,140,180,0.25);
+}
+body.light .fav-btn:hover {
+  background: #fff;
+  border-color: rgba(200,60,60,0.35);
+}
+
+/* ── Reviews section ── */
+body.light .reviews-top    { border-bottom-color: rgba(100,140,180,0.15); }
+body.light .reviews-label  { color: var(--gold); }
+
+/* ── Write review button ── */
+body.light .write-review-btn {
+  background: rgba(42,138,138,0.1);
+  border-color: rgba(42,138,138,0.3);
+  color: var(--teal);
+}
+body.light .write-review-btn:hover {
+  background: rgba(42,138,138,0.18);
+  border-color: var(--teal);
+}
+
+/* ── Individual review cards ── */
+body.light .review-item,
+body.light .review-entry {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(100,140,180,0.18);
+}
+body.light .reviewer-name,
+body.light .review-author { color: #1a2535; }
+body.light .review-text,
+body.light .review-body   { color: #2a3a4a; }
+body.light .review-date,
+body.light .review-time   { color: var(--text-soft); }
+
+/* ── Map status bar ── */
+body.light .map-status-bar {
+  background: rgba(220,235,250,0.95);
+  border-top-color: rgba(100,140,180,0.18);
+  color: #2a4a60;
+}

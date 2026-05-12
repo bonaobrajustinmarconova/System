@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NestQC — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a href="homepage.html" class="brand">
+      <div class="brand-icon"><img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="logo-img" /></div>
+      <div class="brand-text">Nest<span>QC</span></div>
+    </a>
+
+    <div class="left-content">
+      <div class="left-tag">Student Housing</div>
+      <h1 class="left-heading">Welcome <em>Back</em> to NestQC</h1>
+      <p class="left-desc">Log in to access your saved dorms, reviews, and personalized recommendations across Quezon City.</p>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">🗺</div>
+          <div class="feature-text">
+            <strong>Live Dorm Finder</strong>
+            <span>Find dorms near your location with real-time routing</span>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">❤️</div>
+          <div class="feature-text">
+            <strong>Save Your Favorites</strong>
+            <span>Bookmark dorms and compare them side by side</span>
+          </div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⭐</div>
+          <div class="feature-text">
+            <strong>Verified Reviews</strong>
+            <span>Read and write honest reviews from real students</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="login-card">
+      <div class="card-header">
+        <div class="card-title">Sign In</div>
+      </div>
+
+      <div class="error-msg" id="errorMsg">
+        <span>⚠</span>
+        <span id="errorText">Invalid username or password.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-input" type="text" id="username" placeholder="Enter your username" autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="password" placeholder="Enter your password" autocomplete="current-password" style="padding-right: 60px;" />
+          <button class="toggle-pw" type="button" onclick="togglePassword()">Show</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="remember-label">
+          <input type="checkbox" id="remember" />
+          Remember me
+        </label>
+        <a href="#" class="forgot-link" onclick="openForgotModal()">Forgot password?</a>
+      </div>
+
+      <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
+
+      <div class="signup-row">
+        New to NestQC? <a href="register.html">Create a free account</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="login.js"></script>
+  <script src="theme.js"></script>
+
+  <!-- FORGOT PASSWORD MODAL -->
+  <div class="forgot-overlay" id="forgotOverlay" onclick="handleForgotOverlayClick(event)">
+    <div class="forgot-modal">
+      <div class="forgot-header">
+        <div class="forgot-title">Reset Password</div>
+        <button class="forgot-close" onclick="closeForgotModal()">✕</button>
+      </div>
+      <p class="forgot-desc">Enter your username and new password to reset your credentials.</p>
+      <div class="forgot-alert" id="forgotAlert"><span></span><span id="forgotAlertText"></span></div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" type="text" id="forgotUsername" placeholder="Enter your username" />
+      </div>
+          <div class="form-group">
+        <label class="form-label">Current Password</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="forgotOldPw" placeholder="Enter your current password" style="padding-right:60px" />
+          <button class="toggle-pw" type="button" onclick="toggleForgotPw('forgotOldPw', this)">Show</button>
+        </div>
+      </div>
+      <div class="form-group">
+      <label class="form-label">New Password</label>
+
+      <!-- Requirements panel -->
+      <div class="pw-requirements" id="forgotPwStrength">
+        <div class="pw-bars">
+          <div class="pw-bar" id="fbar1"></div>
+          <div class="pw-bar" id="fbar2"></div>
+          <div class="pw-bar" id="fbar3"></div>
+          <div class="pw-bar" id="fbar4"></div>
+          <div class="pw-bar" id="fbar5"></div>
+        </div>
+        <div class="pw-legend">
+          <div class="pw-legend-item" id="fleg1"><span class="pw-legend-dot" id="fdot1"></span><span class="pw-legend-text">Min. 8 characters</span></div>
+          <div class="pw-legend-item" id="fleg2"><span class="pw-legend-dot" id="fdot2"></span><span class="pw-legend-text">Uppercase letter</span></div>
+          <div class="pw-legend-item" id="fleg3"><span class="pw-legend-dot" id="fdot3"></span><span class="pw-legend-text">Lowercase letter</span></div>
+          <div class="pw-legend-item" id="fleg4"><span class="pw-legend-dot" id="fdot4"></span><span class="pw-legend-text">Number (0–9)</span></div>
+          <div class="pw-legend-item" id="fleg5"><span class="pw-legend-dot" id="fdot5"></span><span class="pw-legend-text">Special character (@, #, !…)</span></div>
+        </div>
+      </div>
+
+      <div class="password-wrap">
+        <input class="form-input" type="password" id="forgotNewPw" placeholder="Enter new password" style="padding-right:60px"
+          oninput="checkForgotStrength()" onfocus="showForgotHint()" onblur="hideForgotHint()" />
+        <button class="toggle-pw" type="button" onclick="toggleForgotPw('forgotNewPw', this)">Show</button>
+      </div>
+    </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <div class="password-wrap">
+          <input class="form-input" type="password" id="forgotConfirmPw" placeholder="Re-enter new password" style="padding-right:60px" />
+          <button class="toggle-pw" type="button" onclick="toggleForgotPw('forgotConfirmPw', this)">Show</button>
+        </div>
+      </div>
+      <button class="login-btn" id="forgotBtn" onclick="handleForgotPassword()">Reset Password</button>
+    </div>
+  </div>
+</body>
+</html>

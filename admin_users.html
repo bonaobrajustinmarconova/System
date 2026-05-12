@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NestQC Admin · Users</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin_common.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .user-table { width:100%; border-collapse:collapse; margin-top:10px; }
+    .user-table th { text-align:left; padding:10px 12px; font-size:0.75rem; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border); }
+    .user-table td { padding:14px 12px; font-size:0.88rem; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .role-badge { padding:3px 10px; border-radius:12px; font-size:0.7rem; font-weight:500; }
+    .role-badge.user { background:rgba(42,138,138,0.15); color:var(--teal-light); }
+    .role-badge.admin { background:rgba(201,168,76,0.15); color:var(--gold); }
+    .modal-overlay { position:fixed; inset:0; z-index:500; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#0e1e2e; border:1px solid var(--border-gold); border-radius:14px; padding:24px; width:90%; max-width:420px; }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="sidebar-logo-img" />
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin_dashboard.html" class="nav-icon">
+        <span>☰</span><span class="nav-label">Dashboard</span>
+        <span class="nav-tooltip">Dashboard</span>
+      </a>
+      <a href="admin_dorms.html" class="nav-icon">
+        <span>🏠</span><span class="nav-label">Manage Dorms</span>
+        <span class="nav-tooltip">Manage Dorms</span>
+      </a>
+      <a href="admin_users.html" class="nav-icon active">
+        <span>👥</span><span class="nav-label">Users</span>
+        <span class="nav-tooltip">Users</span>
+      </a>
+      <a href="admin_chat.html" class="nav-icon">
+        <span>💬</span><span class="nav-label">Support Chat</span>
+        <span class="nav-tooltip">Support Chat</span>
+      </a>
+      <a href="admin_add_dorm.html" class="nav-icon">
+        <span>➕</span><span class="nav-label">Add Dorm</span>
+        <span class="nav-tooltip">Add Dorm</span>
+      </a>
+      <a href="admin_archive.html" class="nav-icon">
+      <span>🗃️</span><span class="nav-label">Archive</span>
+      <span class="nav-tooltip">Archive</span>
+      </a>
+    </nav>
+    <div class="nav-icon" onclick="toggleTheme()">
+      <span class="icon-dark">🌙</span>
+      <span class="icon-light">☀️</span>
+      <span class="nav-label icon-dark">Light Mode</span>
+      <span class="nav-label icon-light">Dark Mode</span>
+      <span class="nav-tooltip icon-dark">Switch to Light</span>
+      <span class="nav-tooltip icon-light">Switch to Dark</span>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="nav-icon" onclick="logout()">
+        <span>👤</span><span class="nav-label">Logout</span>
+        <span class="nav-tooltip">Logout</span>
+      </div>
+    </div>
+  </aside>
+
+
+  <!-- Sidebar (active on Users) -->
+  <main class="main">
+    <div class="page-heading">
+      <div class="page-title">User Management</div>
+      <div class="page-subtitle">Manage user accounts and permissions</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Activity</div>
+        <span style="font-size:0.78rem;color:var(--text-soft)">Latest user interactions</span>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <table class="user-table" id="userTable">
+          <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined Date</th><th>Actions</th></tr></thead>
+          <tbody id="userTbody"><tr><td colspan="4" style="color:var(--text-soft);text-align:center;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add User Modal -->
+  <div class="modal-overlay" id="addUserModal" onclick="if(event.target===this)closeAddUserModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="card-title">Add New User</div>
+        <button onclick="closeAddUserModal()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;">✕</button>
+      </div>
+      <div id="addUserAlert" class="alert" style="display:none;margin-bottom:12px;"></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="newFname"></div><div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="newLname"></div></div>
+      <div class="form-group"><label class="form-label">Username / Email</label><input class="form-input" id="newUname"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="newPassword"></div>
+      <div class="form-group"><label class="form-label">Role</label>
+        <select class="form-select" id="newRole"><option value="user">User</option><option value="admin">Admin</option></select>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="addUser()">Add User</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="theme.js"></script>
+  <script src="admin_users.js"></script>
+<script>
+  // Immediately check admin role – redirect if not admin
+  (async () => {
+    try {
+      const res = await fetch('session.php');
+      const data = await res.json();
+      if (!data.loggedIn || data.user.role !== 'admin') {
+        window.location.href = 'login.html';
+      }
+    } catch (err) {
+      window.location.href = 'login.html';
+    }
+  })();
+</script>
+</body>
+</html>

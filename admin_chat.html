@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NestQC Admin · Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin_common.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .chat-split { display:flex; height:calc(100vh - 150px); }
+    .user-pane { width:300px; border-right:1px solid var(--border); overflow-y:auto; }
+    .user-card { padding:14px 16px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s; }
+    .user-card:hover, .user-card.active { background:rgba(42,138,138,0.1); }
+    .user-card-name { font-weight:600; }
+    .user-card-email { font-size:0.78rem; color:var(--text-soft); }
+    .user-card-phone { font-size:0.72rem; color:var(--text-soft); margin-top:2px; }
+    .user-card-last { font-size:0.78rem; color:#ccc; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .conversation-pane { flex:1; display:flex; flex-direction:column; }
+    .conv-header { padding:16px; border-bottom:1px solid var(--border); }
+    .conv-header-name { font-weight:700; font-size:1rem; }
+    .conv-header-contact { font-size:0.78rem; color:var(--teal-light); }
+    .msg-list { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+    .msg-bubble { max-width:75%; padding:10px 14px; border-radius:14px; font-size:0.85rem; line-height:1.5; }
+    .msg-bubble.user { background:rgba(255,255,255,0.07); align-self:flex-start; }
+    .msg-bubble.admin { background:var(--teal); color:#fff; align-self:flex-end; }
+    .msg-time { font-size:0.65rem; opacity:0.7; margin-top:4px; }
+    .reply-area { padding:12px; border-top:1px solid var(--border); display:flex; gap:8px; display:none; }
+    .reply-area input { flex:1; }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="sidebar-logo-img" />
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin_dashboard.html" class="nav-icon">
+        <span>☰</span><span class="nav-label">Dashboard</span>
+        <span class="nav-tooltip">Dashboard</span>
+      </a>
+      <a href="admin_dorms.html" class="nav-icon">
+        <span>🏠</span><span class="nav-label">Manage Dorms</span>
+        <span class="nav-tooltip">Manage Dorms</span>
+      </a>
+      <a href="admin_users.html" class="nav-icon">
+        <span>👥</span><span class="nav-label">Users</span>
+        <span class="nav-tooltip">Users</span>
+      </a>
+      <a href="admin_chat.html" class="nav-icon active">
+        <span>💬</span><span class="nav-label">Support Chat</span>
+        <span class="nav-tooltip">Support Chat</span>
+      </a>
+      <a href="admin_add_dorm.html" class="nav-icon">
+        <span>➕</span><span class="nav-label">Add Dorm</span>
+        <span class="nav-tooltip">Add Dorm</span>
+      </a>
+      <a href="admin_archive.html" class="nav-icon">
+        <span>🗃️</span><span class="nav-label">Archive</span>
+        <span class="nav-tooltip">Archive</span>
+      </a>
+    </nav>
+    <div class="nav-icon" onclick="toggleTheme()">
+      <span class="icon-dark">🌙</span>
+      <span class="icon-light">☀️</span>
+      <span class="nav-label icon-dark">Light Mode</span>
+      <span class="nav-label icon-light">Dark Mode</span>
+      <span class="nav-tooltip icon-dark">Switch to Light</span>
+      <span class="nav-tooltip icon-light">Switch to Dark</span>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="nav-icon" onclick="logout()">
+        <span>👤</span><span class="nav-label">Logout</span>
+        <span class="nav-tooltip">Logout</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sidebar (active on Chat) -->
+  <main class="main">
+    <div class="page-heading">
+      <div class="page-title">Support Chat</div>
+      <div class="page-subtitle">Manage user inquiries</div>
+    </div>
+
+    <div class="chat-split">
+      <div class="user-pane" id="userPane">Loading users…</div>
+      <div class="conversation-pane">
+        <div class="conv-header" id="convHeader" style="display:none;">
+          <div class="conv-header-name" id="convName"></div>
+          <a href="#" class="conv-header-contact" id="convEmail" style="display:block;margin-top:4px;"></a>
+          <div style="font-size:0.78rem;color:var(--text-soft);" id="convPhone"></div>
+        </div>
+        <div class="msg-list" id="msgList"><p style="color:var(--text-soft);text-align:center;padding-top:80px;">Select a user to start chatting.</p></div>
+        <div class="reply-area" id="replyArea" style="display:none;">
+    <input type="text" class="form-input" id="replyInput" placeholder="Type your reply…" />
+    <button class="btn btn-primary" id="sendReplyBtn">Send</button>
+</div>
+      </div>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="theme.js"></script>
+  <script src="admin_chat.js"></script>
+</body>
+</html>

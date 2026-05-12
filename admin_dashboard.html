@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NestQC Admin · Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin_common.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+    .stat-card {
+      background: var(--navy-card); border:1px solid var(--border);
+      border-radius:14px; padding:20px 24px;
+    }
+    .stat-icon { font-size:2rem; margin-bottom:10px; opacity:0.7; }
+    .stat-value { font-size:2rem; font-weight:700; color:var(--white); }
+    .stat-label { font-size:0.8rem; color:var(--text-soft); margin-top:4px; }
+    .recent-msg {
+      background: var(--navy-card); border:1px solid var(--border);
+      border-radius:14px; padding:16px; margin-bottom:8px;
+    }
+    .msg-header { display:flex; justify-content:space-between; font-size:0.82rem; }
+    .msg-user { font-weight:600; color:var(--teal-light); }
+    .msg-time { color:var(--text-soft); }
+    .msg-preview { font-size:0.82rem; color:#ccc; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+  <div class="sidebar-logo">
+  <img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="sidebar-logo-img" />
+  </div>
+  <nav class="sidebar-nav">
+    <a href="admin_dashboard.html" class="nav-icon active">
+      <span>☰</span><span class="nav-label">Dashboard</span>
+      <span class="nav-tooltip">Dashboard</span>
+    </a>
+    <a href="admin_dorms.html" class="nav-icon">
+      <span>🏠</span><span class="nav-label">Manage Dorms</span>
+      <span class="nav-tooltip">Manage Dorms</span>
+    </a>
+    <a href="admin_users.html" class="nav-icon">
+      <span>👥</span><span class="nav-label">Users</span>
+      <span class="nav-tooltip">Users</span>
+    </a>
+    <a href="admin_chat.html" class="nav-icon">
+      <span>💬</span><span class="nav-label">Support Chat</span>
+      <span class="nav-tooltip">Support Chat</span>
+    </a>
+    <a href="admin_add_dorm.html" class="nav-icon">
+      <span>➕</span><span class="nav-label">Add Dorm</span>
+      <span class="nav-tooltip">Add Dorm</span>
+    </a>
+    <a href="admin_archive.html" class="nav-icon">
+      <span>🗃️</span><span class="nav-label">Archive</span>
+      <span class="nav-tooltip">Archive</span>
+    </a>
+  </nav>
+  <div class="nav-icon" onclick="toggleTheme()">
+    <span class="icon-dark">🌙</span>
+    <span class="icon-light">☀️</span>
+    <span class="nav-label icon-dark">Light Mode</span>
+    <span class="nav-label icon-light">Dark Mode</span>
+    <span class="nav-tooltip icon-dark">Switch to Light</span>
+    <span class="nav-tooltip icon-light">Switch to Dark</span>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="nav-icon" onclick="logout()">
+      <span>👤</span><span class="nav-label">Logout</span>
+      <span class="nav-tooltip">Logout</span>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // Immediately check admin role – redirect if not admin
+  (async () => {
+    try {
+      const res = await fetch('session.php');
+      const data = await res.json();
+      if (!data.loggedIn || data.user.role !== 'admin') {
+        window.location.href = 'login.html';
+      }
+    } catch (err) {
+      window.location.href = 'login.html';
+    }
+  })();
+</script>
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-heading">
+      <div class="page-title">Dashboard</div>
+      <div class="page-subtitle">Overview of your NestQC database</div>
+    </div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-icon">🏘</div><div class="stat-value">—</div><div class="stat-label">Total Dorms</div></div>
+      <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">—</div><div class="stat-label">Registered Users</div></div>
+      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value">—</div><div class="stat-label">Total Reviews</div></div>
+      <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value">—</div><div class="stat-label">Unread Messages</div></div>
+    </div>
+
+    <div class="card" style="margin-top:24px;">
+      <div class="card-header"><div class="card-title">Recent User Messages</div></div>
+      <div class="card-body" id="recentMsgs">Loading…</div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="theme.js"></script>
+  <script>
+    // Shared function for toast & logout
+    function showToast(msg, err=false) {
+      const t = document.getElementById('toast'); t.textContent = msg;
+      t.className = `toast ${err?'error':''} show`;
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    async function logout() { await fetch('logout.php'); window.location.href='login.html'; }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('admin_stats.php');
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-icon">🏘</div><div class="stat-value">${data.dorms}</div><div class="stat-label">Total Dorms</div></div>
+          <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">${data.users}</div><div class="stat-label">Registered Users</div></div>
+          <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value">${data.reviews}</div><div class="stat-label">Total Reviews</div></div>
+          <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value">${data.unread_msgs}</div><div class="stat-label">Unread Messages</div></div>
+        `;
+        let msgsHtml = data.recent_messages.length ? '' : '<p style="color:var(--text-soft)">No recent messages.</p>';
+        data.recent_messages.forEach(m => {
+          msgsHtml += `<div class="recent-msg">
+            <div class="msg-header"><span class="msg-user">${m.fname} ${m.lname}</span><span class="msg-time">${m.created_at}</span></div>
+            <div class="msg-preview">${m.content}</div>
+          </div>`;
+        });
+        document.getElementById('recentMsgs').innerHTML = msgsHtml;
+      } catch(e) { showToast('Could not load stats.', true); }
+    }
+    loadStats();
+  </script>
+</body>
+</html>

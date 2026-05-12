@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NestQC Admin · Dorms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin_common.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    .dorm-list { display:flex; flex-direction:column; gap:12px; }
+    .dorm-item {
+      background:var(--navy-card); border:1px solid var(--border);
+      border-radius:12px; padding:16px 20px;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:all 0.2s; cursor:default;
+    }
+    .dorm-item:hover { border-color:rgba(42,138,138,0.3); }
+    .dorm-info { display:flex; flex-direction:column; gap:4px; }
+    .dorm-name { font-weight:700; color:var(--white); }
+    .dorm-meta { font-size:0.8rem; color:var(--text-soft); }
+    .dorm-actions { display:flex; gap:8px; }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <!-- SIDEBAR same as dashboard except active on dorms -->
+  <aside class="sidebar">
+  <div class="sidebar-logo">
+  <img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="sidebar-logo-img" />
+  </div>
+  <nav class="sidebar-nav">
+    <a href="admin_dashboard.html" class="nav-icon">
+      <span>☰</span><span class="nav-label">Dashboard</span>
+      <span class="nav-tooltip">Dashboard</span>
+    </a>
+    <a href="admin_dorms.html" class="nav-icon active">
+      <span>🏠</span><span class="nav-label">Manage Dorms</span>
+      <span class="nav-tooltip">Manage Dorms</span>
+    </a>
+    <a href="admin_users.html" class="nav-icon">
+      <span>👥</span><span class="nav-label">Users</span>
+      <span class="nav-tooltip">Users</span>
+    </a>
+    <a href="admin_chat.html" class="nav-icon">
+      <span>💬</span><span class="nav-label">Support Chat</span>
+      <span class="nav-tooltip">Support Chat</span>
+    </a>
+    <a href="admin_add_dorm.html" class="nav-icon">
+      <span>➕</span><span class="nav-label">Add Dorm</span>
+      <span class="nav-tooltip">Add Dorm</span>
+    </a>
+    <a href="admin_archive.html" class="nav-icon">
+      <span>🗃️</span><span class="nav-label">Archive</span>
+      <span class="nav-tooltip">Archive</span>
+    </a>
+  </nav>
+  <div class="nav-icon" onclick="toggleTheme()">
+    <span class="icon-dark">🌙</span>
+    <span class="icon-light">☀️</span>
+    <span class="nav-label icon-dark">Light Mode</span>
+    <span class="nav-label icon-light">Dark Mode</span>
+    <span class="nav-tooltip icon-dark">Switch to Light</span>
+    <span class="nav-tooltip icon-light">Switch to Dark</span>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="nav-icon" onclick="logout()">
+      <span>👤</span><span class="nav-label">Logout</span>
+      <span class="nav-tooltip">Logout</span>
+    </div>
+  </div>
+</aside>
+  <main class="main">
+    <div class="page-heading">
+      <div class="page-title">All Dorms</div>
+      <div class="page-subtitle"><span id="dormCount">0</span> total listings</div>
+    </div>
+    <div class="dorm-list" id="dormList">Loading dorms…</div>
+  </main>
+  <script src="theme.js"></script>
+<script>
+  // Immediately check admin role – redirect if not admin
+  (async () => {
+    try {
+      const res = await fetch('session.php');
+      const data = await res.json();
+      if (!data.loggedIn || data.user.role !== 'admin') {
+        window.location.href = 'login.html';
+      }
+    } catch (err) {
+      window.location.href = 'login.html';
+    }
+  })();
+</script>
+  <div class="toast" id="toast"></div>
+  <script>
+    function showToast(msg, err=false) {
+      const t = document.getElementById('toast'); t.textContent = msg;
+      t.className = `toast ${err?'error':''} show`;
+      clearTimeout(window._toastTimer); window._toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    async function logout() { await fetch('logout.php'); window.location.href='login.html'; }
+
+    async function loadDorms() {
+      try {
+        const res = await fetch('get_all_dorms.php');
+        const data = await res.json();
+        if (!data.success) throw new Error();
+        document.getElementById('dormCount').textContent = data.dorms.length;
+        let html = '';
+        data.dorms.forEach(d => {
+          html += `<div class="dorm-item">
+            <div class="dorm-info">
+              <div class="dorm-name">${d.dname}</div>
+              <div class="dorm-meta">📍 ${d.address || 'Quezon City'} · ⭐ ${d.average_rating} · ₱${d.price.toLocaleString()}/mo</div>
+            </div>
+            <div class="dorm-actions">
+              <a href="admin_edit_dorm.html?id=${d.dormID}" class="btn btn-primary">Edit</a>
+              <button class="btn btn-danger" onclick="archiveDorm(${d.dormID})">🗃️ Archive</button>
+            </div>
+          </div>`;
+        });
+        if (!html) html = '<p style="color:var(--text-soft);text-align:center;padding:40px;">No dorms found.</p>';
+        document.getElementById('dormList').innerHTML = html;
+      } catch(e) { showToast('Failed to load dorms.', true); }
+    }
+
+    async function archiveDorm(id) {
+      if (!confirm('Archive this dorm? It will be hidden from the public site but can be restored anytime.')) return;
+      try {
+        const res = await fetch('archive_dorm.php', { method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dormID: id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Dorm archived.');
+          loadDorms();
+        } else {
+          showToast(data.message || 'Archive failed.', true);
+        }
+      } catch(e) { showToast('Network error.', true); }
+    }
+
+    loadDorms();
+  </script>
+</body>
+</html>

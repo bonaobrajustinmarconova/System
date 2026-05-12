@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NestQC · All Dorms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="browse_dorms.css">
+  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    
+    /* ── Edit Profile: Register-style pw strength widget ── */
+    .edit-pw-strength-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(42,138,138,0.2);
+      border-radius: 10px;
+      padding: 12px 14px 10px;
+      margin-bottom: 10px;
+      display: none;  /* shown via JS */
+    }
+    .edit-pw-strength-box.show { display: block; }
+    .edit-pw-bars { display: flex; gap: 5px; margin-bottom: 10px; }
+    .edit-pw-bar  { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+    .edit-pw-bar.met { background: #2ab4a0; }
+    .edit-pw-legend {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4px 16px; font-size: 0.74rem;
+    }
+    .edit-pw-leg {
+      display: flex; align-items: center; gap: 7px;
+      color: rgba(138,154,176,0.6); transition: color 0.2s;
+    }
+    .edit-pw-leg.met { color: #2ab4a0; }
+    .edit-pw-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(138,154,176,0.3); transition: background 0.25s;
+    }
+    .edit-pw-dot.met { background: #2ab4a0; box-shadow: 0 0 6px rgba(42,180,160,0.6); }
+
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-grid"></div>
+
+  <div class="overlay" id="overlay" onclick="closePanel()"></div>
+
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <div class="panel-title">Menu</div>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-user">
+      <div class="user-avatar" id="menuAvatar">J</div>
+      <div><div class="user-name" id="menuName">Loading…</div></div>
+    </div>
+    <div class="panel-items">
+      <a href="#" class="panel-item" onclick="openEditModal(event)">✏️ &nbsp;Edit Profile</a>
+      <a href="#" class="panel-item" onclick="openLikedPanel(event)">
+        ❤️ &nbsp;Liked Dorms
+        <span class="liked-badge" id="likedBadge">0</span>
+      </a>
+    </div>
+    <div class="panel-logout" onclick="logout()">🚪 &nbsp;Logout</div>
+  </div>
+
+  <div class="liked-panel" id="likedPanel">
+    <div class="panel-header">
+      <button class="back-panel-btn" onclick="closeLikedPanel()">← Back</button>
+      <div class="panel-title">Liked Dorms</div>
+      <div style="width:60px"></div>
+    </div>
+    <div class="dorm-liked-list" id="dormList"></div>
+  </div>
+
+  <div class="edit-modal-overlay" id="editModalOverlay" onclick="handleEditOverlayClick(event)">
+    <div class="edit-modal" id="editModal">
+      <div class="edit-modal-header">
+        <div class="edit-modal-title">Edit Profile</div>
+        <button class="edit-modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="edit-modal-body">
+        <div class="edit-avatar-row">
+          <div class="edit-avatar-preview" id="editAvatarPreview">J<input type="file" accept="image/*" onchange="previewAvatar(event)" /></div>
+          <div class="edit-avatar-info"><strong>Profile Photo</strong><span>Click avatar to upload a new photo</span></div>
+        </div>
+        <div class="edit-tabs">
+          <button class="edit-tab active" onclick="switchEditTab('info', this)">Personal Info</button>
+          <button class="edit-tab" onclick="switchEditTab('password', this)">Change Password</button>
+        </div>
+        <div class="edit-tab-content active" id="tab-info">
+          <div class="edit-alert" id="infoAlert"><span></span><span id="infoAlertText"></span></div>
+          <div class="edit-form-row">
+            <div class="edit-form-group"><label class="edit-form-label">First Name</label><input class="edit-form-input" type="text" id="editFname" placeholder="Juan" /></div>
+            <div class="edit-form-group"><label class="edit-form-label">Last Name</label><input class="edit-form-input" type="text" id="editLname" placeholder="Dela Cruz" /></div>
+          </div>
+          <div class="edit-form-group"><label class="edit-form-label">Middle Name <span class="optional">(optional)</span></label><input class="edit-form-input" type="text" id="editMname" placeholder="Santos" /></div>
+          <div class="edit-form-group"><label class="edit-form-label">Username</label><input class="edit-form-input" type="text" id="editUname" placeholder="juandelacruz" /></div>
+          <button class="edit-save-btn" id="saveInfoBtn" onclick="saveProfileInfo()">Save Changes</button>
+        </div>
+        <div class="edit-tab-content" id="tab-password">
+          <div class="edit-alert" id="pwAlert"><span></span><span id="pwAlertText"></span></div>
+          <div class="edit-form-group"><label class="edit-form-label">Current Password</label><div class="pw-wrap"><input class="edit-form-input" type="password" id="currentPw" placeholder="Enter current password" style="padding-right:55px" /><button class="pw-toggle" type="button" onclick="togglePw('currentPw',this)">Show</button></div></div>
+                      <div class="edit-form-group">
+            <label class="edit-form-label">New Password</label>
+            <!-- Register-style strength widget -->
+            <div class="edit-pw-strength-box" id="editPwStrength">
+              <div class="edit-pw-bars">
+                <div class="edit-pw-bar" id="pwBar1"></div>
+                <div class="edit-pw-bar" id="pwBar2"></div>
+                <div class="edit-pw-bar" id="pwBar3"></div>
+                <div class="edit-pw-bar" id="pwBar4"></div>
+                <div class="edit-pw-bar" id="pwBar5"></div>
+              </div>
+              <div class="edit-pw-legend">
+                <div class="edit-pw-leg" id="req-length"><span class="edit-pw-dot" id="dot-length"></span>Min. 8 characters</div>
+                <div class="edit-pw-leg" id="req-upper"><span class="edit-pw-dot" id="dot-upper"></span>Uppercase letter</div>
+                <div class="edit-pw-leg" id="req-lower"><span class="edit-pw-dot" id="dot-lower"></span>Lowercase letter</div>
+                <div class="edit-pw-leg" id="req-number"><span class="edit-pw-dot" id="dot-number"></span>Number (0–9)</div>
+                <div class="edit-pw-leg" id="req-special"><span class="edit-pw-dot" id="dot-special"></span>Special character (@, #, !…)</div>
+              </div>
+            </div>
+            <div class="pw-wrap">
+              <input class="edit-form-input" type="password" id="newPw" placeholder="Enter new password" style="padding-right:55px" oninput="checkPwStrength()" onfocus="showEditPwHint()" onblur="hideEditPwHint()" />
+              <button class="pw-toggle" type="button" onclick="togglePw('newPw',this)">Show</button>
+            </div>
+          </div>
+          <div class="edit-form-group"><label class="edit-form-label">Confirm New Password</label><div class="pw-wrap"><input class="edit-form-input" type="password" id="confirmPw" placeholder="Re-enter new password" style="padding-right:55px" /><button class="pw-toggle" type="button" onclick="togglePw('confirmPw',this)">Show</button></div></div>
+          <button class="edit-save-btn" id="savePwBtn" onclick="savePassword()">Change Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-left">
+      <a href="homepage.html" class="back-btn"><span class="arrow">←</span> Home</a>
+      <div class="header-divider"></div>
+      <a href="homepage.html" class="logo">
+        <div class="logo-icon"><img src="pictures/nestqc_logo.png" alt="NestQC Logo" class="logo-img" /></div>
+        <div class="logo-text">Nest<span>QC</span></div>
+      </a>
+      <div class="header-divider"></div>
+      <span class="page-label">All Dorms</span>
+    </div>
+    <div class="header-right">
+        <!-- Guest buttons (shown/hidden via JS) -->
+        <div id="guest-header-btns" style="display:none; align-items:center; gap:8px;">
+          <a href="login.html"><button class="nav-btn">Sign In</button></a>
+          <a href="register.html"><button class="nav-btn primary">Sign Up</button></a>
+        </div>
+        <button class="theme-toggle" title="Toggle light/dark mode">
+          <span class="icon-dark">🌙</span>
+          <span class="icon-light">☀️</span>
+        </button>
+        <button class="menu-btn" id="menuBtn" onclick="openPanel()">
+          <span></span><span></span><span></span>
+        </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-title-section">
+      <div class="page-title-main">All Dorms</div>
+      <div class="page-title-sub"><span id="dorm-count">0</span> dorms found</div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" id="searchInput" placeholder="Search by dorm name or location…" oninput="filterDorms()" />
+      </div>
+      <div class="sort-chips">
+        <button class="sort-chip active" onclick="sortDorms('rating', this)">Top Rated</button>
+        <button class="sort-chip" onclick="sortDorms('price_asc', this)">Price ↑</button>
+        <button class="sort-chip" onclick="sortDorms('price_desc', this)">Price ↓</button>
+        <button class="sort-chip" onclick="sortDorms('name', this)">A–Z</button>
+      </div>
+    </div>
+    <div class="dorm-grid" id="dormGrid">
+      <div class="state-msg"><div class="icon">🏠</div><p>Loading dorms…</p></div>
+    </div>
+  </main>
+
+  <script src="theme.js"></script>
+  <script src="browse_dorms.js"></script>
+  <script src="editprofile.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>
